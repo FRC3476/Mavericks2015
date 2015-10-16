@@ -139,9 +139,9 @@ public class Robot extends IterativeRobot {
 	    	mainIntakeMotor.set(0);
     	}
     	
-    	if (controller.getRawButton(2))// Is this something you want to keep? -Aleks
-    	{
-    		aimSolenoid.set(false);
+    	if (controller.getRawButton(2))	//
+    	{								// Is this something you want to keep? -Aleks
+    		aimSolenoid.set(false);		//
     	}
 	    
 	    //frisbee loading sequence
@@ -161,17 +161,15 @@ public class Robot extends IterativeRobot {
 	    }
 	    
 	    if(controller.getRawButton(8) == true){
-	    	
-	    	grappleSolenoid.set(true);
-	    	
+	    	grappleSolenoid.set(true);	
 	    }
-	    
 	    
 	    if(controller.getRawButton(9) == true){
 	    	relay.set(Value.kForward);
-	    }
-	    if(controller.getRawButton(9) == true){
+	    } else if(controller.getRawButton(9) == true){
 	    	relay.set(Value.kReverse);
+	    }else{
+	    	relay.set(Value.kOff);
 	    }
 	 }
     
