@@ -23,7 +23,8 @@ public class Robot extends IterativeRobot {
      * This function is run when the robot is first started up and should be
      * used for any initialization code.
      */
-	Joystick controller = new Joystick(1);
+	Joystick xbox = new Joystick(0);
+	Joystick joystick = new Joystick(1);
 	
 	Talon flyTalon1 = new Talon(1);
 	Talon flyTalon2 = new Talon(2);
@@ -39,12 +40,28 @@ public class Robot extends IterativeRobot {
 	Timer loadTimer = new Timer();
 	Relay relay = new Relay(0);
 	
+	//Shooter timer boolean
 	boolean runningTimer = false;
+	
+	//Grapple toggle booleans
+	boolean lastGrappleButton = false;
+	boolean grapple = false;
 	
 	enum Mode {DEFAULT, INTAKE, SHOOTUP, SHOOTDOWN}
     Mode mode = Mode.DEFAULT;
+    
+    //Buttons
+    final int DEFAULT = 11, INTAKE = 6, HIGH = 10, LOW = 8, TRIGGER = 0, MANUALFIRE = -1, GRAPPLE = -1;//todo get button numbers for "-1"'s
+    boolean defaultButton = joystick.getRawButton(DEFAULT);
+    boolean intakeButton = joystick.getRawButton(INTAKE);
+    boolean highButton = joystick.getRawButton(HIGH);
+    boolean lowButton = joystick.getRawButton(LOW);
+    boolean trigger = joystick.getRawButton(TRIGGER);
+    boolean manualFireButton = joystick.getRawButton(MANUALFIRE);
+    boolean grappleButton = joystick.getRawButton(GRAPPLE);
 	
-	public void robotInit() {
+	public void robotInit()
+	{
     	loadTimer.start();
     }
 
@@ -60,14 +77,15 @@ public class Robot extends IterativeRobot {
      */
     public void teleopPeriodic() {
     	//7 9 11 12
-    	double xAxis = controller.getRawAxis(0);
-    	double yAxis = controller.getRawAxis(1);
+    	double xAxis = xbox.getRawAxis(0);
+    	double yAxis = xbox.getRawAxis(1);
     	double SUCKMOTORSPEED = 1.0;
     	double LOADMOTORSPEED = 1.0;
     	double GRABFRISBEETIME = 0.33;
     	double SHOOTFRISBEETIME = 0.33;
-    	boolean grappleToggle = false;
-    	boolean previousToggle = false;
+    	
+    	
+    	
 //    	leftTalon1.set(xAxis+yAxis);
 //    	rightTalon1.set(yAxis-xAxis);
 //    	leftTalon2.set(xAxis+yAxis);
@@ -78,27 +96,85 @@ public class Robot extends IterativeRobot {
     	//buttons and values may have to be changed
     	drive.arcadeDrive(yAxis, xAxis);
     	
+    	//Store last button state for toggle
+    	lastGrappleButton = grappleButton;
+    	
+    	//Poll buttons
+    	defaultButton = joystick.getRawButton(DEFAULT);
+        intakeButton = joystick.getRawButton(INTAKE);
+        highButton = joystick.getRawButton(HIGH);
+        lowButton = joystick.getRawButton(LOW);
+        trigger = joystick.getRawButton(TRIGGER);
+        manualFireButton = joystick.getRawButton(MANUALFIRE);
+        grappleButton = joystick.getRawButton(GRAPPLE);
+    	
     	
     	
     	//enum set mode block
-    	if (controller.getRawButton(12))
+    	if(defaultButton)
     	{
     		mode = Mode.DEFAULT;
     	}
-    	else if (controller.getRawButton(11))
+    	else if(highButton)
     	{
     		mode = Mode.SHOOTUP;
     	}
-    	else if (controller.getRawButton(9))
+    	else if(lowButton)
     	{
     		mode = Mode.SHOOTDOWN;
     	}
-    	else if (controller.getRawButton(11))
+    	else if(intakeButton)
     	{
     		mode = Mode.INTAKE;
     	}
     	
-    	if (mode == Mode.DEFAULT)
+    	//mode switch block
+    	switch(mode)
+    	{
+    		case INTAKE:
+    			aimSolenoid.set(false);
+        		flyTalon1.set(0);
+    	    	flyTalon2.set(0);    	
+    	    	flyTalon3.set(0);    	
+    	    	flyTalon4.set(0);
+    	    	dropIntakeMotor.set(SUCKMOTORSPEED);
+    	    	mainIntakeMotor.set(LOADMOTORSPEED);
+    	    	break;
+    	    	
+    		case SHOOTDOWN:
+    			aimSolenoid.set(false);
+        		flyTalon1.set(1);
+    	    	flyTalon2.set(1);    	
+    	    	flyTalon3.set(1);    	
+    	    	flyTalon4.set(1);
+    	    	dropIntakeMotor.set(0);
+    	    	mainIntakeMotor.set(0);
+    	    	break;
+    	    	
+    		case SHOOTUP:
+    			aimSolenoid.set(true);
+        		flyTalon1.set(1);
+    	    	flyTalon2.set(1);    	
+    	    	flyTalon3.set(1);    	
+    	    	flyTalon4.set(1);
+    	    	dropIntakeMotor.set(0);
+    	    	mainIntakeMotor.set(0);
+    	    	break;
+    	    	
+    	    default: //is the default case and also the DEFAULT mode case
+    	    	aimSolenoid.set(false);
+        		flyTalon1.set(0);
+    	    	flyTalon2.set(0);    	
+    	    	flyTalon3.set(0);    	
+    	    	flyTalon4.set(0);
+    	    	dropIntakeMotor.set(0);
+    	    	mainIntakeMotor.set(0);
+    	    	break;
+    	    	
+    	}
+    	
+    	//old mode switching if above doesn't work
+    	/*if (mode == Mode.DEFAULT)
     	{
     		aimSolenoid.set(false);
     		flyTalon1.set(0);
@@ -137,38 +213,43 @@ public class Robot extends IterativeRobot {
 	    	flyTalon4.set(1);
 	    	dropIntakeMotor.set(0);
 	    	mainIntakeMotor.set(0);
-    	}
-    	
-    	if (controller.getRawButton(2))	//
-    	{								// Is this something you want to keep? -Aleks
-    		aimSolenoid.set(false);		//
-    	}
+    	}*/
 	    
 	    //frisbee loading sequence
-	    if (controller.getRawButton(5) == true && runningTimer == false){
+	    if (joystick.getRawButton(5) && !runningTimer)//TODO: replace joystick.getRawButton(5) with the appropriate button
+	    {
 	    	loadTimer.start();
-	    	runningTimer=true;
+	    	runningTimer = true;
 			loadSolenoid.set(true);
 		}
 	    
-	    if(loadTimer.get() > GRABFRISBEETIME && runningTimer == true){
+	    if(runningTimer && loadTimer.get() > GRABFRISBEETIME){
 	    	loadSolenoid.set(false);
 	    }
 	    
-	    if(loadTimer.get() > GRABFRISBEETIME+SHOOTFRISBEETIME && runningTimer == true){
+	    if(runningTimer && loadTimer.get() > GRABFRISBEETIME + SHOOTFRISBEETIME){
 	    	loadTimer.stop();
 	    	loadTimer.reset();
 	    }
 	    
-	    if(controller.getRawButton(8) == true){
-	    	grappleSolenoid.set(true);	
+	    //Grapple toggle
+	    if(grappleButton && !lastGrappleButton)
+	    {
+	    	grapple = !grapple;
 	    }
+	    grappleSolenoid.set(grapple);
 	    
-	    if(controller.getRawButton(9) == true){
+	    //TODO: this logic, remember to include a control on both controllers and add boolean button variables to do so
+	    if(xbox.getRawButton(9))
+	    {
 	    	relay.set(Value.kForward);
-	    } else if(controller.getRawButton(9) == true){
+	    }
+	    else if(xbox.getRawButton(9))
+	    {
 	    	relay.set(Value.kReverse);
-	    }else{
+	    }
+	    else
+	    {
 	    	relay.set(Value.kOff);
 	    }
 	 }
