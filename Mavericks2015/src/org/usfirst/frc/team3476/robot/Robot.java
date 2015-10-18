@@ -9,6 +9,9 @@ import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Timer;
+
+import org.usfirst.frc.team3476.Utility.*;
+
 import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.Relay.Value;
 /**
@@ -43,9 +46,8 @@ public class Robot extends IterativeRobot {
 	//Shooter timer boolean
 	boolean runningTimer = false;
 	
-	//Grapple toggle booleans
-	boolean lastGrappleButton = false;
-	boolean grapple = false;
+	//Grapple toggle
+	Toggle grapple = new Toggle();
 	
 	enum Mode {DEFAULT, INTAKE, SHOOTUP, SHOOTDOWN}
     Mode mode = Mode.DEFAULT;
@@ -98,9 +100,6 @@ public class Robot extends IterativeRobot {
     	//may have to reverse motors for shooter
     	//buttons and values may have to be changed
     	drive.arcadeDrive(yAxis, xAxis);
-    	
-    	//Store last button state for toggle
-    	lastGrappleButton = grappleButton;
     	
     	//Poll joystick buttons
     	defaultButton = joystick.getRawButton(DEFAULT);
@@ -246,11 +245,9 @@ public class Robot extends IterativeRobot {
 	    }
 	    
 	    //Grapple toggle
-	    if(grappleButton && !lastGrappleButton)
-	    {
-	    	grapple = !grapple;
-	    }
-	    grappleSolenoid.set(grapple);
+	    //grapple is of type Toggle
+	    grapple.input(grappleButton);
+	    grappleSolenoid.set(grapple.get());
 	    
 	    //TODO: Check if this is right (Forward, backward, etc.)
 	    if((intakeUpButton && intakeDownButton) || (!intakeUpButton && !intakeDownButton)) //Both or none are pressed
