@@ -38,7 +38,7 @@ public class Robot extends IterativeRobot {
 	Solenoid loadSolenoid = new Solenoid(2);
 	Solenoid grappleSolenoid = new Solenoid(3);
 	Timer loadTimer = new Timer();
-	Relay relay = new Relay(0);
+	Relay dropdown = new Relay(0);
 	
 	//Shooter timer boolean
 	boolean runningTimer = false;
@@ -50,7 +50,7 @@ public class Robot extends IterativeRobot {
 	enum Mode {DEFAULT, INTAKE, SHOOTUP, SHOOTDOWN}
     Mode mode = Mode.DEFAULT;
     
-    //Buttons
+    //Joystick buttons
     final int DEFAULT = 11, INTAKE = 6, HIGH = 10, LOW = 8, TRIGGER = 0, MANUALFIRE = -1, GRAPPLE = -1;//todo get button numbers for "-1"'s
     boolean defaultButton = joystick.getRawButton(DEFAULT);
     boolean intakeButton = joystick.getRawButton(INTAKE);
@@ -59,7 +59,12 @@ public class Robot extends IterativeRobot {
     boolean trigger = joystick.getRawButton(TRIGGER);
     boolean manualFireButton = joystick.getRawButton(MANUALFIRE);
     boolean grappleButton = joystick.getRawButton(GRAPPLE);
-	
+    
+    //Xbox buttons
+    final int INTAKEUP = 11, INTAKEDOWN = 6;
+    boolean intakeUpButton = joystick.getRawButton(INTAKEUP);
+    boolean intakeDownButton = xbox.getRawButton(INTAKEDOWN);
+
 	public void robotInit()
 	{
     	loadTimer.start();
@@ -68,15 +73,13 @@ public class Robot extends IterativeRobot {
     /**
      * This function is called periodically during autonomous
      */
-    public void autonomousPeriodic() {
-
-    }
+    public void autonomousPeriodic() {}
 
     /**
      * This function is called periodically during operator control
      */
-    public void teleopPeriodic() {
-    	//7 9 11 12
+    public void teleopPeriodic()
+    {
     	double xAxis = xbox.getRawAxis(0);
     	double yAxis = xbox.getRawAxis(1);
     	double SUCKMOTORSPEED = 1.0;
@@ -99,7 +102,7 @@ public class Robot extends IterativeRobot {
     	//Store last button state for toggle
     	lastGrappleButton = grappleButton;
     	
-    	//Poll buttons
+    	//Poll joystick buttons
     	defaultButton = joystick.getRawButton(DEFAULT);
         intakeButton = joystick.getRawButton(INTAKE);
         highButton = joystick.getRawButton(HIGH);
@@ -108,7 +111,9 @@ public class Robot extends IterativeRobot {
         manualFireButton = joystick.getRawButton(MANUALFIRE);
         grappleButton = joystick.getRawButton(GRAPPLE);
     	
-    	
+    	//Poll xbox buttons
+        intakeUpButton = joystick.getRawButton(INTAKEUP);
+        intakeDownButton = xbox.getRawButton(INTAKEDOWN);
     	
     	//enum set mode block
     	if(defaultButton)
@@ -215,21 +220,29 @@ public class Robot extends IterativeRobot {
 	    	mainIntakeMotor.set(0);
     	}*/
 	    
-	    //frisbee loading sequence
-	    if (joystick.getRawButton(5) && !runningTimer)//TODO: replace joystick.getRawButton(5) with the appropriate button
+	    //Frisbee auto-loading sequence
+	    if (trigger && !runningTimer)
 	    {
 	    	loadTimer.start();
 	    	runningTimer = true;
 			loadSolenoid.set(true);
 		}
 	    
-	    if(runningTimer && loadTimer.get() > GRABFRISBEETIME){
+	    if(runningTimer && loadTimer.get() > GRABFRISBEETIME)
+	    {
 	    	loadSolenoid.set(false);
 	    }
 	    
-	    if(runningTimer && loadTimer.get() > GRABFRISBEETIME + SHOOTFRISBEETIME){
+	    if(runningTimer && loadTimer.get() > GRABFRISBEETIME + SHOOTFRISBEETIME)
+	    {
 	    	loadTimer.stop();
 	    	loadTimer.reset();
+	    	runningTimer = false;
+	    }
+	    
+	    if(!runningTimer) //If not auto-loading, manual
+	    {
+	    	loadSolenoid.set(manualFireButton);
 	    }
 	    
 	    //Grapple toggle
@@ -239,26 +252,23 @@ public class Robot extends IterativeRobot {
 	    }
 	    grappleSolenoid.set(grapple);
 	    
-	    //TODO: this logic, remember to include a control on both controllers and add boolean button variables to do so
-	    if(xbox.getRawButton(9))
+	    //TODO: Check if this is right (Forward, backward, etc.)
+	    if((intakeUpButton && intakeDownButton) || (!intakeUpButton && !intakeDownButton)) //Both or none are pressed
 	    {
-	    	relay.set(Value.kForward);
+	    	dropdown.set(Value.kOff);
 	    }
-	    else if(xbox.getRawButton(9))
+	    if(intakeUpButton) //Up is pressed
 	    {
-	    	relay.set(Value.kReverse);
+	    	dropdown.set(Value.kForward);
 	    }
-	    else
+	    else //Only remaining option is down is pressed
 	    {
-	    	relay.set(Value.kOff);
+	    	dropdown.set(Value.kReverse);
 	    }
 	 }
     
     /**
      * This function is called periodically during test mode
      */
-    public void testPeriodic() {
-    
-    }
-    
+    public void testPeriodic() {}
 }
