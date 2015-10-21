@@ -29,19 +29,19 @@ public class Robot extends IterativeRobot {
 	Joystick xbox = new Joystick(0);
 	Joystick joystick = new Joystick(1);
 	
-	Talon flyTalon1 = new Talon(1);
-	Talon flyTalon2 = new Talon(2);
-	Talon flyTalon3 = new Talon(3);
-	Talon flyTalon4 = new Talon(4);
-	Talon dropIntakeMotor = new Talon(5); 
+	Talon flyTalon1 = new Talon(0);
+	Talon flyTalon2 = new Talon(1);
+	Talon flyTalon3 = new Talon(2);
+	Talon flyTalon4 = new Talon(3);
+	Talon dropIntakeMotor = new Talon(9); 
 	Talon mainIntakeMotor = new Talon(6);
-	RobotDrive drive = new RobotDrive(1, 2, 3, 4);
+	RobotDrive drive = new RobotDrive(7, 8, 4, 5);
 	
 	Solenoid aimSolenoid = new Solenoid(1);
 	Solenoid loadSolenoid = new Solenoid(2);
 	Solenoid grappleSolenoid = new Solenoid(3);
 	Timer loadTimer = new Timer();
-	Relay dropdown = new Relay(0);
+	Relay dropdown = new Relay(3);
 	
 	//Shooter timer boolean
 	boolean runningTimer = false;
