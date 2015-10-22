@@ -7,4 +7,8 @@ public interface Subsystem
 	void doAuto(double[] params, String command);
 	
 	boolean isAutoDone();
+	
+	String[] getConstantRequest();
+	
+	public void returnConstantRequest(double[] constants);
 }

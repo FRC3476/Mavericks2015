@@ -17,6 +17,13 @@ public class Main
 		systems = systemsin;
 	}
 	
+	//Testing constructor
+	public Main(String year, Subsystem[] systemsin, String script, String constants)
+	{
+		par = new Parser(script, constants, year);
+		systems = systemsin;
+	}
+	
 	public void start()
 	{
 		ArrayList<CommandBlock> curCommands;
@@ -33,6 +40,7 @@ public class Main
 						current = findSubsystem(block.getCommand().getName());//Grab the subsystem that deals with this command
 						if(!block.getCommand().isStarted())//If the command has not been started (new command), start it (duh)
 						{
+							current.getConstantRequest();
 							current.doAuto(block.getCommand().getParams(), block.getCommand().getName());
 							block.getCommand().start();
 						}

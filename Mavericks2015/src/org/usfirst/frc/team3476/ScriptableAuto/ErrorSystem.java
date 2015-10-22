@@ -9,4 +9,8 @@ public class ErrorSystem implements Subsystem
 	public void doAuto(double[] params, String command) {}
 	
 	public boolean isAutoDone() {return true;}
+	
+	public String[] getConstantRequest(){return new String[]{};}
+	
+	public void returnConstantRequest(double[] constants){}
 }

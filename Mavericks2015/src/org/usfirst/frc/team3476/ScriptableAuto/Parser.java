@@ -28,8 +28,17 @@ public class Parser
 			endOfLine = script.length();
 		}
 		String line = script.substring(0, endOfLine);//Get the next line
-		script = script.substring(endOfLine + 1);//Remove the line we just retrieved
-		line = line.substring(0, line.indexOf("//"));//Remove comments
+		if (script.length() == endOfLine)
+		{
+			script = "";//Remove the line we just retrieved
+		}
+		
+		//Remove comments
+		int comdex = line.indexOf("//");
+		if(comdex != -1)
+		{
+			line = line.substring(0, comdex);
+		}
 		
 		ArrayList<CommandBlock> lineCommands = new ArrayList<CommandBlock>();
 		
@@ -111,7 +120,7 @@ public class Parser
 		
 		for(String possYear : years)
 		{
-			if(possYear.substring(0, possYear.indexOf("YEARSEPERATOR")).equals(constantYear))
+			if(possYear.substring(0, possYear.indexOf(YEARSEPERATOR)).equals(constantYear))
 			{
 				return possYear;
 			}
