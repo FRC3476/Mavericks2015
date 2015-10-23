@@ -48,6 +48,7 @@ public class Toggle
 		{
 			inputRising(in);
 		}
+		last = in;
 	}
 	
 	/**

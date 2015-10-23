@@ -39,9 +39,10 @@ public class Robot extends IterativeRobot {
 	
 	Solenoid aimSolenoid = new Solenoid(1);
 	Solenoid loadSolenoid = new Solenoid(2);
-	Solenoid grappleSolenoid = new Solenoid(3);
+	Solenoid grappleSolenoid = new Solenoid(0);
+	Solenoid shifterSoleniod = new Solenoid(3);
 	Timer loadTimer = new Timer();
-	Relay dropdown = new Relay(3);
+	Relay dropdown = new Relay(2);
 	
 	//Shooter timer boolean
 	boolean runningTimer = false;
@@ -53,7 +54,7 @@ public class Robot extends IterativeRobot {
     Mode mode = Mode.DEFAULT;
     
     //Joystick buttons
-    final int DEFAULT = 11, INTAKE = 6, HIGH = 10, LOW = 8, TRIGGER = 1, MANUALFIRE = 2, GRAPPLE = 3;//todo get button numbers for "-1"'s
+    final int DEFAULT = 12, INTAKE = 7, HIGH = 11, LOW = 9, TRIGGER = 1, MANUALFIRE = 3, GRAPPLE = 5;//todo get button numbers for "-1"'s
     boolean defaultButton = joystick.getRawButton(DEFAULT);
     boolean intakeButton = joystick.getRawButton(INTAKE);
     boolean highButton = joystick.getRawButton(HIGH);
@@ -70,6 +71,7 @@ public class Robot extends IterativeRobot {
 	public void robotInit()
 	{
     	loadTimer.start();
+    	System.out.println("load timer: " + loadTimer.get());
     }
 
     /**
@@ -132,6 +134,7 @@ public class Robot extends IterativeRobot {
     		mode = Mode.INTAKE;
     	}
     	
+    	System.out.print("mode: " + mode);
     	//mode switch block
     	switch(mode)
     	{
@@ -143,6 +146,10 @@ public class Robot extends IterativeRobot {
     	    	flyTalon4.set(0);
     	    	dropIntakeMotor.set(SUCKMOTORSPEED);
     	    	mainIntakeMotor.set(LOADMOTORSPEED);
+    	    	System.out.println("case: Intake");
+    	    	//tells if the mode is activated
+    	    	//the mode is working properly it's just that the both motors starts when the robot starts
+    	    	//intake motor is spinning in the wrong direction
     	    	break;
     	    	
     		case SHOOTDOWN:
@@ -153,6 +160,7 @@ public class Robot extends IterativeRobot {
     	    	flyTalon4.set(1);
     	    	dropIntakeMotor.set(0);
     	    	mainIntakeMotor.set(0);
+    	    	System.out.println("case: SHOOTDOWN");
     	    	break;
     	    	
     		case SHOOTUP:
@@ -163,6 +171,7 @@ public class Robot extends IterativeRobot {
     	    	flyTalon4.set(1);
     	    	dropIntakeMotor.set(0);
     	    	mainIntakeMotor.set(0);
+    	    	System.out.println("case: SHOOTUP");
     	    	break;
     	    	
     	    default: //is the default case and also the DEFAULT mode case
@@ -173,6 +182,7 @@ public class Robot extends IterativeRobot {
     	    	flyTalon4.set(0);
     	    	dropIntakeMotor.set(0);
     	    	mainIntakeMotor.set(0);
+    	    	System.out.println("case: Default");
     	    	break;
     	    	
     	}
@@ -246,21 +256,24 @@ public class Robot extends IterativeRobot {
 //	    
 	    //Grapple toggle
 	    //grapple is of type Toggle
-//	    grapple.input(grappleButton);
-//	    grappleSolenoid.set(grapple.get());
-//	    
+	    grapple.input(grappleButton);
+	    grappleSolenoid.set(grapple.get());
+	    
 	    //TODO: Check if this is right (Forward, backward, etc.)
 	    if((intakeUpButton && intakeDownButton) || (!intakeUpButton && !intakeDownButton)) //Both or none are pressed
 	    {
-	    	dropdown.set(Value.kOff);
+	    	dropdown.set(Relay.Value.kOff);
+	    	//System.out.println("both buttons are being pressed?: " + dropdown.get());
 	    }
-	    if(intakeUpButton) //Up is pressed
+	    else if(intakeUpButton) //Up is pressed
 	    {
-	    	dropdown.set(Value.kForward);
+	    	dropdown.set(Relay.Value.kForward);
+	    	//System.out.println("Up button pressed?: " + dropdown.get());
 	    }
 	    else //Only remaining option is down is pressed
 	    {
-	    	dropdown.set(Value.kReverse);
+	    	dropdown.set(Relay.Value.kReverse);
+	    	//System.out.println("Down button pressed?: " + dropdown.get());
 	    }
 	 }
     
