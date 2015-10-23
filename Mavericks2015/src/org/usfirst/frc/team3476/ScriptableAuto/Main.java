@@ -28,32 +28,43 @@ public class Main
 	{
 		ArrayList<CommandBlock> curCommands;
 		Subsystem current;
+		
+		System.out.println("starting script parse");
 		while(par.hasNextLine())
 		{
+			System.out.println("Has next line: " + par.hasNextLine());
 			curCommands = par.nextLine();
+			System.out.println("starting line parse");
 			while (!curCommands.isEmpty())//Keep going until line is done (ArrayList is empty)
 			{
+				System.out.println("starting CommandBlock");
 				for (CommandBlock block : curCommands)//Go thru each CommandBlock on this line
 				{
+					System.out.print("checking if there is another Command in this block");
 					if(block.hasNext())//If there is another command, do things
 					{
+						System.out.println("Checking Command: " + block.getCommand());
 						current = findSubsystem(block.getCommand().getName());//Grab the subsystem that deals with this command
 						if(!block.getCommand().isStarted())//If the command has not been started (new command), start it (duh)
 						{
+							System.out.println("Command not started");
 							current.getConstantRequest();
 							current.doAuto(block.getCommand().getParams(), block.getCommand().getName());
 							block.getCommand().start();
 						}
 						else
 						{
+							System.out.println("Command started");
 							if(current.isAutoDone())//If the subsystem is done, remove the command from the queue
 							{
+								System.out.println("Command is done");
 								block.finishCommand();
 							}
 						}
 					}
 					else//No more commands, remove that sucker
 					{
+						System.out.println("CommandBlock finished");
 						curCommands.remove(block);
 					}
 				}

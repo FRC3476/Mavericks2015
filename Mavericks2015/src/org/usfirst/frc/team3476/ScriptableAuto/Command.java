@@ -59,4 +59,18 @@ public class Command
 	{
 		return started;
 	}
+	
+	public String toString()
+	{
+		String toReturn = command;
+		if(params[0] != 0)
+		{
+			toReturn += ": " + params[0];
+		}
+		if(params[1] != 0)
+		{
+			toReturn += " @ " + params[1];
+		}
+		return toReturn;
+	}
 }

@@ -5,7 +5,6 @@ import org.usfirst.frc.team3476.Main.Subsystem;
 
 public class AutoTester
 {
-
 	public static void main(String[] args)
 	{
 		String script = "test: 47@48 \ntest";
@@ -16,7 +15,8 @@ public class AutoTester
 		
 		Main main = new Main("2015", systems, script, constants);
 		
+		System.out.println("starting");
 		main.start();
+		System.out.println("done");
 	}
-
 }
