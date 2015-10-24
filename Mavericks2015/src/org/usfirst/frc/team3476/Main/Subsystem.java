@@ -10,5 +10,5 @@ public interface Subsystem
 	
 	String[] getConstantRequest();
 	
-	public void returnConstantRequest(double[] constants);
+	void returnConstantRequest(double[] constants);
 }

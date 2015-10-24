@@ -6,7 +6,7 @@ public class Shooter implements Subsystem
 {
 	double test1, test2;
 	
-	public String[] getAutoCommands(){return new String[]{};}
+	public String[] getAutoCommands(){return new String[]{"test"};}
 	
 	public void doAuto(double[] params, String command)
 	{
@@ -25,4 +25,9 @@ public class Shooter implements Subsystem
 		test1 = constants[0];
 		test2 = constants[1];
 	}//Request all needed constants
+	
+	public String toString()
+	{
+		return "Shooter";
+	}
 }

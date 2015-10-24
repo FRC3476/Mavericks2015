@@ -1,10 +1,11 @@
 package org.usfirst.frc.team3476.ScriptableAuto;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class Parser
 {
-	String PARALLELSEPARATOR = ";", CONSTANTSSEPERATOR = "\0027", YEARSEPERATOR = "~";
+	String PARALLELSEPARATOR = ";", CONSTANTSSEPERATOR = "\0027", YEARSEPERATOR = "~", FIRSTPARAM = ":", SECONDPARAM = "@", THEN = ">";
 	String script;
 	String constants;
 	String constantYear;
@@ -18,8 +19,7 @@ public class Parser
 	
 	public ArrayList<CommandBlock> nextLine()
 	{
-		System.out.println("Parsing line.");
-		System.out.println("SCRIPT: \"" + script + "\"");
+		System.out.println("Parser - Parsing line.");
 		if(script.equals(""))
 		{
 			return new ArrayList<CommandBlock>();
@@ -66,11 +66,11 @@ public class Parser
 	
 	private CommandBlock parseCommandBlock(String commandBlock)
 	{
-		System.out.println("Parsing CommandBlock.");
+		System.out.println("Parser - Parsing CommandBlock.");
 		commandBlock = commandBlock.trim();
 		ArrayList<Command> blockCommands = new ArrayList<Command>();
 		
-		int thendex = commandBlock.indexOf("then");
+		int thendex = commandBlock.indexOf(THEN);
 		while(thendex != -1)
 		{
 			commandBlock = commandBlock.trim();
@@ -79,7 +79,7 @@ public class Parser
 			
 			blockCommands.add(parseCommand(command));
 			
-			thendex = commandBlock.indexOf("then");
+			thendex = commandBlock.indexOf(THEN);
 		}
 		blockCommands.add(parseCommand(commandBlock));
 		
@@ -88,20 +88,22 @@ public class Parser
 	
 	private Command parseCommand(String thenBlock)
 	{
-		System.out.println("Parsing Command.");
+		System.out.println("Parser - Parsing Command: \"" + thenBlock + "\", length " + thenBlock.length());
 		thenBlock = thenBlock.trim();
 		String command = "error";
 		double colonParam = 0.0;
 		double atParam = 0.0;
-		int colonIndex = thenBlock.indexOf(":");
-		int atIndex = thenBlock.indexOf("@");
+		int colonIndex = thenBlock.indexOf(FIRSTPARAM);
+		int atIndex = thenBlock.indexOf(SECONDPARAM);
 		if(colonIndex != -1)//Is there a colon?
 		{
+			System.out.println("Parser - There is a colon at " + colonIndex);
 			command = thenBlock.substring(0, colonIndex).trim();
 			if(atIndex != -1)//Is there an at?
 			{
-				colonParam = cleanDoubleParse(command.substring(colonIndex + 1, atIndex)); //Grab the stuff between the : and @ and parse
-				atParam = cleanDoubleParse(command.substring(atIndex + 1)); //Grab the stuff after the @ and parse
+				System.out.println("Parser - There is an @ at " + atIndex);
+				colonParam = cleanDoubleParse(thenBlock.substring(colonIndex + 1, atIndex)); //Grab the stuff between the : and @ and parse
+				atParam = cleanDoubleParse(thenBlock.substring(atIndex + 1)); //Grab the stuff after the @ and parse
 			}
 			else
 			{
@@ -117,14 +119,24 @@ public class Parser
 		double[] params = new double[2];
 		params[0] = colonParam;
 		params[1] = atParam;
-		System.out.println("command parsed: " + new Command(command, params));
+		System.out.println("Parser - command parsed: " + new Command(command, params));
 		return new Command(command, params);
 	}
 	
-	public double getConstant(String key)
+	public double getConstant(String key) throws IOException
 	{
 		int keydex = constants.indexOf(key);
-		String sValue = constants.substring(constants.indexOf("=", keydex) + 1, constants.indexOf("\n", keydex)).trim();
+		int equals = constants.indexOf("=", keydex);
+		if(equals == -1)
+		{
+			throw new IOException("Missing equals in " + constantYear + " constants at line " + (constants.substring(0, keydex).replace("[^\n]", "").length() + 1));
+		}
+		int endOfLine = constants.indexOf("\n", keydex);
+		if(endOfLine == -1)
+		{
+			endOfLine = constants.length();
+		}
+		String sValue = constants.substring(equals + 1, endOfLine).trim();
 		return cleanDoubleParse(sValue);
 	}
 	
@@ -143,7 +155,7 @@ public class Parser
 		{
 			if(possYear.substring(0, possYear.indexOf(YEARSEPERATOR)).equals(constantYear))
 			{
-				return possYear;
+				return possYear.substring(possYear.indexOf(YEARSEPERATOR) + 1);
 			}
 		}
 		return "";
@@ -151,7 +163,7 @@ public class Parser
 	
 	private double cleanDoubleParse(String mess)
 	{
-		return Double.parseDouble(mess.replaceAll("[^\\D.-]", ""));
+		return Double.parseDouble(mess.replaceAll("[^\\d.-]", ""));
 	}
 	
 	public boolean hasNextLine()

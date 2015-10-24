@@ -13,4 +13,9 @@ public class ErrorSystem implements Subsystem
 	public String[] getConstantRequest(){return new String[]{};}
 	
 	public void returnConstantRequest(double[] constants){}
+	
+	public String toString()
+	{
+		return "ErrorSystem";
+	}
 }
