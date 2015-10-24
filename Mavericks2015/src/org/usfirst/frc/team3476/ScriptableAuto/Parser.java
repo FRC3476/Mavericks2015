@@ -125,8 +125,10 @@ public class Parser
 	
 	public double getConstant(String key) throws IOException
 	{
+		System.out.println("Constants file: \"" + constants + "\"");
 		int keydex = constants.indexOf(key);
 		int equals = constants.indexOf("=", keydex);
+		System.out.println("Key: \"" + key + "\", keydex = " + keydex + ", equals = " + equals);
 		if(equals == -1)
 		{
 			throw new IOException("Missing equals in " + constantYear + " constants at line " + (constants.substring(0, keydex).replace("[^\n]", "").length() + 1));
