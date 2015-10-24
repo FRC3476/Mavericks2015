@@ -2,6 +2,7 @@
 package org.usfirst.frc.team3476.robot;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Relay;
 import edu.wpi.first.wpilibj.Talon;
@@ -12,7 +13,9 @@ import edu.wpi.first.wpilibj.Timer;
 
 import org.usfirst.frc.team3476.Utility.*;
 
+import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.DigitalOutput;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Relay.Value;
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -29,10 +32,17 @@ public class Robot extends IterativeRobot {
 	Joystick xbox = new Joystick(0);
 	Joystick joystick = new Joystick(1);
 	
+	double xAxis = -xbox.getRawAxis(4);
+	double yAxis = -xbox.getRawAxis(1);
+	double rightTrigger = xbox.getRawAxis(3);
+	
 	Talon flyTalon1 = new Talon(0);
 	Talon flyTalon2 = new Talon(1);
 	Talon flyTalon3 = new Talon(2);
 	Talon flyTalon4 = new Talon(3);
+	//Flywheel constants
+	final double FLY1 = -1.0, FLY2 = 1.0, FLY3 = -1.0, FLY4 = 1.0; 
+	
 	Talon dropIntakeMotor = new Talon(9); 
 	Talon mainIntakeMotor = new Talon(6);
 	RobotDrive drive = new RobotDrive(7, 8, 4, 5);
@@ -53,8 +63,14 @@ public class Robot extends IterativeRobot {
 	enum Mode {DEFAULT, INTAKE, SHOOTUP, SHOOTDOWN}
     Mode mode = Mode.DEFAULT;
     
+    //Motor constants
+	double SUCKMOTORSPEED = -1.0;
+	double LOADMOTORSPEED = -1.0;
+	double GRABFRISBEETIME = 0.33;
+	double SHOOTFRISBEETIME = 0.33;
+    
     //Joystick buttons
-    final int DEFAULT = 12, INTAKE = 7, HIGH = 11, LOW = 9, TRIGGER = 1, MANUALFIRE = 3, GRAPPLE = 5;//todo get button numbers for "-1"'s
+    final int DEFAULT = 12, INTAKE = 7, HIGH = 11, LOW = 9, TRIGGER = 1, MANUALFIRE = 2, GRAPPLE = 5, REVERSE = 3;//todo get button numbers for "-1"'s
     boolean defaultButton = joystick.getRawButton(DEFAULT);
     boolean intakeButton = joystick.getRawButton(INTAKE);
     boolean highButton = joystick.getRawButton(HIGH);
@@ -62,16 +78,24 @@ public class Robot extends IterativeRobot {
     boolean trigger = joystick.getRawButton(TRIGGER);
     boolean manualFireButton = joystick.getRawButton(MANUALFIRE);
     boolean grappleButton = joystick.getRawButton(GRAPPLE);
+    boolean reverseButton = joystick.getRawButton(REVERSE);
     
     //Xbox buttons
     final int INTAKEUP = 5, INTAKEDOWN = 6;
     boolean intakeUpButton = xbox.getRawButton(INTAKEUP);
     boolean intakeDownButton = xbox.getRawButton(INTAKEDOWN);
+    
+    //Encoders
+    Encoder leftDrive = new Encoder(3, 4, true, EncodingType.k4X);
+    Encoder rightDrive = new Encoder(1, 2, true, EncodingType.k4X);
 
 	public void robotInit()
 	{
     	loadTimer.start();
+    	
     	System.out.println("load timer: " + loadTimer.get());
+    	leftDrive.setDistancePerPulse(0.01225688428613428232514076911301);
+    	rightDrive.setDistancePerPulse(0.01225688428613428232514076911301);
     }
 
     /**
@@ -84,14 +108,10 @@ public class Robot extends IterativeRobot {
      */
     public void teleopPeriodic()
     {
-    	double xAxis = -xbox.getRawAxis(0);
-    	double yAxis = -xbox.getRawAxis(1);
-    	double SUCKMOTORSPEED = 1.0;
-    	double LOADMOTORSPEED = 1.0;
-    	double GRABFRISBEETIME = 0.33;
-    	double SHOOTFRISBEETIME = 0.33;
-    	
-    	
+    	System.out.println("Right: " + rightDrive.getDistance() + ", Left: " + leftDrive.getDistance());
+    	xAxis = -xbox.getRawAxis(4);
+    	yAxis = -xbox.getRawAxis(1);
+    	rightTrigger = xbox.getRawAxis(3);
     	
 //    	leftTalon1.set(xAxis+yAxis);
 //    	rightTalon1.set(yAxis-xAxis);
@@ -102,7 +122,6 @@ public class Robot extends IterativeRobot {
     	//may have to reverse motors for shooter
     	//buttons and values may have to be changed
     	drive.arcadeDrive(yAxis, xAxis);
-    	System.out.println(xAxis);
     	//Poll joystick buttons
     	defaultButton = joystick.getRawButton(DEFAULT);
         intakeButton = joystick.getRawButton(INTAKE);
@@ -111,6 +130,7 @@ public class Robot extends IterativeRobot {
         trigger = joystick.getRawButton(TRIGGER);
         manualFireButton = joystick.getRawButton(MANUALFIRE);
         grappleButton = joystick.getRawButton(GRAPPLE);
+        reverseButton = joystick.getRawButton(REVERSE);
     	
     	//Poll xbox buttons
         intakeUpButton = xbox.getRawButton(INTAKEUP);
@@ -134,7 +154,6 @@ public class Robot extends IterativeRobot {
     		mode = Mode.INTAKE;
     	}
     	
-    	System.out.print("mode: " + mode);
     	//mode switch block
     	switch(mode)
     	{
@@ -144,9 +163,8 @@ public class Robot extends IterativeRobot {
     	    	flyTalon2.set(0);    	
     	    	flyTalon3.set(0);    	
     	    	flyTalon4.set(0);
-    	    	dropIntakeMotor.set(SUCKMOTORSPEED);
-    	    	mainIntakeMotor.set(LOADMOTORSPEED);
-    	    	System.out.println("case: Intake");
+    	    	dropIntakeMotor.set(reverseButton ? -SUCKMOTORSPEED : SUCKMOTORSPEED);
+    	    	mainIntakeMotor.set(reverseButton ? -LOADMOTORSPEED : LOADMOTORSPEED);
     	    	//tells if the mode is activated
     	    	//the mode is working properly it's just that the both motors starts when the robot starts
     	    	//intake motor is spinning in the wrong direction
@@ -154,24 +172,22 @@ public class Robot extends IterativeRobot {
     	    	
     		case SHOOTDOWN:
     			aimSolenoid.set(false);
-        		flyTalon1.set(1);
-    	    	flyTalon2.set(1);    	
-    	    	flyTalon3.set(1);    	
-    	    	flyTalon4.set(1);
+        		flyTalon1.set(FLY1);
+    	    	flyTalon2.set(FLY2);    	
+    	    	flyTalon3.set(FLY3);    	
+    	    	flyTalon4.set(FLY4);
     	    	dropIntakeMotor.set(0);
     	    	mainIntakeMotor.set(0);
-    	    	System.out.println("case: SHOOTDOWN");
     	    	break;
     	    	
     		case SHOOTUP:
     			aimSolenoid.set(true);
-        		flyTalon1.set(1);
-    	    	flyTalon2.set(1);    	
-    	    	flyTalon3.set(1);    	
-    	    	flyTalon4.set(1);
+        		flyTalon1.set(FLY1);
+    	    	flyTalon2.set(FLY2);    	
+    	    	flyTalon3.set(FLY3);    	
+    	    	flyTalon4.set(FLY4);
     	    	dropIntakeMotor.set(0);
     	    	mainIntakeMotor.set(0);
-    	    	System.out.println("case: SHOOTUP");
     	    	break;
     	    	
     	    default: //is the default case and also the DEFAULT mode case
@@ -182,7 +198,6 @@ public class Robot extends IterativeRobot {
     	    	flyTalon4.set(0);
     	    	dropIntakeMotor.set(0);
     	    	mainIntakeMotor.set(0);
-    	    	System.out.println("case: Default");
     	    	break;
     	    	
     	}
@@ -230,34 +245,44 @@ public class Robot extends IterativeRobot {
     	}*/
 	    
 	    //Frisbee auto-loading sequence
-//	    if (trigger && !runningTimer)
-//	    {
-//	    	loadTimer.start();
-//	    	runningTimer = true;
-//			loadSolenoid.set(true);
-//		}
-//	    
-//	    if(runningTimer && loadTimer.get() > GRABFRISBEETIME)
-//	    {
-//	    	loadSolenoid.set(false);
-//	    }
-//	    
-//	    if(runningTimer && loadTimer.get() > GRABFRISBEETIME + SHOOTFRISBEETIME)
-//	    {
-//	    	loadTimer.stop();
-//	    	loadTimer.reset();
-//	    	runningTimer = false;
-//	    }
-//	    
-//	    if(!runningTimer) //If not auto-loading, manual
-//	    {
-//	    	loadSolenoid.set(manualFireButton);
-//	    }
-//	    
+	    if (trigger && !runningTimer)
+	    {
+	    	loadTimer.start();
+	    	runningTimer = true;
+			loadSolenoid.set(true);
+	    }
+	    if(runningTimer && loadTimer.get() > GRABFRISBEETIME)
+	    {
+	    	loadSolenoid.set(false);
+	    }
+	    if(runningTimer && loadTimer.get() > GRABFRISBEETIME + SHOOTFRISBEETIME)
+	    {
+	    	loadTimer.stop();
+	    	loadTimer.reset();
+	    	runningTimer = false;
+	    }
+	    
+	    //Manual fire
+	    if(!runningTimer) //If not auto-loading, manual
+	    {
+	    	loadSolenoid.set(manualFireButton);
+	    }
+	    
+	    //Manual shifting
+	    if(rightTrigger >= 0.5)//shift high
+	    {
+	    	shifterSoleniod.set(false);
+	    }
+	    else//shift low
+	    {
+	    	shifterSoleniod.set(true);
+	    }
+	    
 	    //Grapple toggle
 	    //grapple is of type Toggle
 	    grapple.input(grappleButton);
 	    grappleSolenoid.set(grapple.get());
+	    
 	    
 	    //TODO: Check if this is right (Forward, backward, etc.)
 	    if((intakeUpButton && intakeDownButton) || (!intakeUpButton && !intakeDownButton)) //Both or none are pressed
