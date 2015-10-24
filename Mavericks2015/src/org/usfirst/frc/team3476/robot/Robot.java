@@ -160,8 +160,8 @@ public class Robot extends IterativeRobot {
     		case INTAKE:
     			aimSolenoid.set(false);
         		flyTalon1.set(0);
-    	    	flyTalon2.set(0);    	
-    	    	flyTalon3.set(0);    	
+    	    	flyTalon2.set(0);
+    	    	flyTalon3.set(0);
     	    	flyTalon4.set(0);
     	    	dropIntakeMotor.set(reverseButton ? -SUCKMOTORSPEED : SUCKMOTORSPEED);
     	    	mainIntakeMotor.set(reverseButton ? -LOADMOTORSPEED : LOADMOTORSPEED);
