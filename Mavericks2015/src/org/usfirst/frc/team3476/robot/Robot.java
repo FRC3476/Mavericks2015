@@ -41,7 +41,7 @@ public class Robot extends IterativeRobot {
 	Talon flyTalon3 = new Talon(2);
 	Talon flyTalon4 = new Talon(3);
 	//Flywheel constants
-	final double FLY1 = -1.0, FLY2 = 1.0, FLY3 = -1.0, FLY4 = 1.0; 
+	final double FLY1 = -1.0, FLY2 = 1, FLY3 = -1.0, FLY4 = 1; 
 	
 	Talon dropIntakeMotor = new Talon(9); 
 	Talon mainIntakeMotor = new Talon(6);
@@ -62,6 +62,13 @@ public class Robot extends IterativeRobot {
 	
 	enum Mode {DEFAULT, INTAKE, SHOOTUP, SHOOTDOWN}
     Mode mode = Mode.DEFAULT;
+    
+    //Shifting state
+    RunningAverage avgRate = new RunningAverage(8);
+    final double IPS = 48.0;
+    final double HYSTERESIS = 0.2;
+    enum ShiftingState {LOW, HIGH}
+    ShiftingState shiftingState = ShiftingState.LOW;
     
     //Motor constants
 	double SUCKMOTORSPEED = -1.0;
@@ -108,7 +115,8 @@ public class Robot extends IterativeRobot {
      */
     public void teleopPeriodic()
     {
-    	System.out.println("Right: " + rightDrive.getDistance() + ", Left: " + leftDrive.getDistance());
+    	avgRate.addValue((rightDrive.getRate() + leftDrive.getRate())/2);
+    	//System.out.println("Right: " + rightDrive.getDistance() + ", Left: " + leftDrive.getDistance() + ", Average Rate: " + (rightDrive.getRate() + leftDrive.getRate())/2);
     	xAxis = -xbox.getRawAxis(4);
     	yAxis = -xbox.getRawAxis(1);
     	rightTrigger = xbox.getRawAxis(3);
@@ -273,10 +281,23 @@ public class Robot extends IterativeRobot {
 	    {
 	    	shifterSoleniod.set(false);
 	    }
-	    else//shift low
+	    else//auto shifting
 	    {
-	    	shifterSoleniod.set(true);
+	    	switch(shiftingState)
+	    	{
+	    		case HIGH:
+	    			System.out.print("Case: HIGH, Rate = " + Math.abs(avgRate.getAverage()));
+	    			if(Math.abs(avgRate.getAverage()) <= IPS - HYSTERESIS) shiftingState = ShiftingState.LOW;
+	    			shifterSoleniod.set(false);
+	    			break;
+	    		case LOW:
+	    			System.out.print("Case: LOW, Rate = " + Math.abs(avgRate.getAverage()));
+	    			if(Math.abs(avgRate.getAverage()) >= IPS + HYSTERESIS) shiftingState = ShiftingState.HIGH;
+	    			shifterSoleniod.set(true);
+	    			break;
+	    	}
 	    }
+	    System.out.println(", Instant Rate = " + (rightDrive.getRate() + leftDrive.getRate())/2);
 	    
 	    //Grapple toggle
 	    //grapple is of type Toggle
