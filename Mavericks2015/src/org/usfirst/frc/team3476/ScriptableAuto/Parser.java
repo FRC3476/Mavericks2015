@@ -18,6 +18,8 @@ public class Parser
 	
 	public ArrayList<CommandBlock> nextLine()
 	{
+		System.out.println("Parsing line.");
+		System.out.println("SCRIPT: \"" + script + "\"");
 		if(script.equals(""))
 		{
 			return new ArrayList<CommandBlock>();
@@ -32,6 +34,10 @@ public class Parser
 		{
 			script = "";//Remove the line we just retrieved
 		}
+		else
+		{
+			script = script.substring(endOfLine + 1);
+		}
 		
 		//Remove comments
 		int comdex = line.indexOf("//");
@@ -42,33 +48,47 @@ public class Parser
 		
 		ArrayList<CommandBlock> lineCommands = new ArrayList<CommandBlock>();
 		
-		while(line.indexOf(PARALLELSEPARATOR) != -1)//While there are still parallel commands to be processed, create command blocks
+		int semiIndex = line.indexOf(PARALLELSEPARATOR);
+		while(semiIndex != -1)//While there are still parallel commands to be processed, create command blocks
 		{
 			line = line.trim();
-			String commandBlock = line.substring(0, line.indexOf(";"));
-			line = line.substring(line.indexOf(";") + 1);
-			commandBlock = commandBlock.trim();
+			String commandBlock = line.substring(0, semiIndex);
+			line = line.substring(semiIndex + 1);
 			
 			lineCommands.add(parseCommandBlock(commandBlock));
+			
+			semiIndex = line.indexOf(PARALLELSEPARATOR);
 		}
+		lineCommands.add(parseCommandBlock(line));
+		
 		return lineCommands;
 	}
 	
 	private CommandBlock parseCommandBlock(String commandBlock)
 	{
+		System.out.println("Parsing CommandBlock.");
 		commandBlock = commandBlock.trim();
 		ArrayList<Command> blockCommands = new ArrayList<Command>();
+		
 		int thendex = commandBlock.indexOf("then");
 		while(thendex != -1)
 		{
-			blockCommands.add(parseCommand(commandBlock.substring(0, thendex)));
+			commandBlock = commandBlock.trim();
+			String command = commandBlock.substring(0, thendex);
+			commandBlock = commandBlock.substring(thendex + 1);
+			
+			blockCommands.add(parseCommand(command));
+			
 			thendex = commandBlock.indexOf("then");
 		}
+		blockCommands.add(parseCommand(commandBlock));
+		
 		return new CommandBlock(blockCommands);
 	}
 	
 	private Command parseCommand(String thenBlock)
 	{
+		System.out.println("Parsing Command.");
 		thenBlock = thenBlock.trim();
 		String command = "error";
 		double colonParam = 0.0;
@@ -97,6 +117,7 @@ public class Parser
 		double[] params = new double[2];
 		params[0] = colonParam;
 		params[1] = atParam;
+		System.out.println("command parsed: " + new Command(command, params));
 		return new Command(command, params);
 	}
 	

@@ -45,4 +45,9 @@ public class CommandBlock
 	{
 		return !commands.isEmpty();
 	}
+	
+	public String toString()
+	{
+		return commands.toString();
+	}
 }

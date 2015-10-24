@@ -29,12 +29,10 @@ public class Main
 		ArrayList<CommandBlock> curCommands;
 		Subsystem current;
 		
-		System.out.println("starting script parse");
 		while(par.hasNextLine())
 		{
-			System.out.println("Has next line: " + par.hasNextLine());
 			curCommands = par.nextLine();
-			System.out.println("starting line parse");
+			System.out.println("starting line parse with commandblock: " + curCommands);
 			while (!curCommands.isEmpty())//Keep going until line is done (ArrayList is empty)
 			{
 				System.out.println("starting CommandBlock");
