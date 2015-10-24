@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 public class Parser
 {
-	String PARALLELSEPARATOR = ";", CONSTANTSSEPERATOR = "\0027", YEARSEPERATOR = "~", FIRSTPARAM = ":", SECONDPARAM = "@", THEN = ">";
+	String PARALLELSEPARATOR = ";", CONSTANTSSEPERATOR = "\u001B", YEARSEPERATOR = "~", FIRSTPARAM = ":", SECONDPARAM = "@", THEN = ">";
 	String script;
 	String constants;
 	String constantYear;
@@ -19,7 +19,6 @@ public class Parser
 	
 	public ArrayList<CommandBlock> nextLine()
 	{
-		System.out.println("Parser - Parsing line.");
 		if(script.equals(""))
 		{
 			return new ArrayList<CommandBlock>();
@@ -66,7 +65,6 @@ public class Parser
 	
 	private CommandBlock parseCommandBlock(String commandBlock)
 	{
-		System.out.println("Parser - Parsing CommandBlock.");
 		commandBlock = commandBlock.trim();
 		ArrayList<Command> blockCommands = new ArrayList<Command>();
 		
@@ -88,7 +86,6 @@ public class Parser
 	
 	private Command parseCommand(String thenBlock)
 	{
-		System.out.println("Parser - Parsing Command: \"" + thenBlock + "\", length " + thenBlock.length());
 		thenBlock = thenBlock.trim();
 		String command = "error";
 		double colonParam = 0.0;
@@ -97,11 +94,9 @@ public class Parser
 		int atIndex = thenBlock.indexOf(SECONDPARAM);
 		if(colonIndex != -1)//Is there a colon?
 		{
-			System.out.println("Parser - There is a colon at " + colonIndex);
 			command = thenBlock.substring(0, colonIndex).trim();
 			if(atIndex != -1)//Is there an at?
 			{
-				System.out.println("Parser - There is an @ at " + atIndex);
 				colonParam = cleanDoubleParse(thenBlock.substring(colonIndex + 1, atIndex)); //Grab the stuff between the : and @ and parse
 				atParam = cleanDoubleParse(thenBlock.substring(atIndex + 1)); //Grab the stuff after the @ and parse
 			}
@@ -119,16 +114,14 @@ public class Parser
 		double[] params = new double[2];
 		params[0] = colonParam;
 		params[1] = atParam;
-		System.out.println("Parser - command parsed: " + new Command(command, params));
 		return new Command(command, params);
 	}
 	
 	public double getConstant(String key) throws IOException
 	{
-		System.out.println("Constants file: \"" + constants + "\"");
 		int keydex = constants.indexOf(key);
 		int equals = constants.indexOf("=", keydex);
-		System.out.println("Key: \"" + key + "\", keydex = " + keydex + ", equals = " + equals);
+		
 		if(equals == -1)
 		{
 			throw new IOException("Missing equals in " + constantYear + " constants at line " + (constants.substring(0, keydex).replace("[^\n]", "").length() + 1));
@@ -145,17 +138,20 @@ public class Parser
 	private String retrieveThisYear(String constantsin)
 	{
 		ArrayList<String> years = new ArrayList<String>();
-		int sep;
-		while(constantsin.indexOf(CONSTANTSSEPERATOR) != -1)
+		int sep = constantsin.indexOf(CONSTANTSSEPERATOR);
+		
+		while(sep != -1)
 		{
-			sep = constantsin.indexOf(CONSTANTSSEPERATOR);
 			years.add(constantsin.substring(0, sep));
 			constantsin = constantsin.substring(sep + 1);
+			
+			sep = constantsin.indexOf(CONSTANTSSEPERATOR);
 		}
+		years.add(constantsin);
 		
 		for(String possYear : years)
 		{
-			if(possYear.substring(0, possYear.indexOf(YEARSEPERATOR)).equals(constantYear))
+			if(possYear.substring(0, possYear.indexOf(YEARSEPERATOR)).trim().equals(constantYear))
 			{
 				return possYear.substring(possYear.indexOf(YEARSEPERATOR) + 1);
 			}
