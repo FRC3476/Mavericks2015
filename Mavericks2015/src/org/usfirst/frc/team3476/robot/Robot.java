@@ -41,12 +41,12 @@ public class Robot extends IterativeRobot {
 	Talon flyTalon3 = new Talon(2);
 	Talon flyTalon4 = new Talon(3);
 	//Flywheel constants
-	final double FLY1 = -1.0, FLY2 = 1, FLY3 = -1.0, FLY4 = 1; 
+	final double FLY1 = -1, FLY2 = 1, FLY3 = -1, FLY4 = 1; 
+	//Fly1 and Fly3 are bottom fly motors. Fly2 and Fly4 are top motors.
 	
 	Talon dropIntakeMotor = new Talon(9); 
 	Talon mainIntakeMotor = new Talon(6);
 	RobotDrive drive = new RobotDrive(7, 8, 4, 5);
-	
 	Solenoid aimSolenoid = new Solenoid(1);
 	Solenoid loadSolenoid = new Solenoid(2);
 	Solenoid grappleSolenoid = new Solenoid(0);

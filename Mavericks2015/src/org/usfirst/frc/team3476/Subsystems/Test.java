@@ -2,7 +2,7 @@ package org.usfirst.frc.team3476.Subsystems;
 
 import org.usfirst.frc.team3476.Main.Subsystem;
 
-public class Shooter implements Subsystem
+public class Test implements Subsystem
 {
 	double test1, test2;
 	
@@ -32,8 +32,5 @@ public class Shooter implements Subsystem
 	}
 
 	@Override
-	public void update() {
-		// TODO Auto-generated method stub
-		
-	}
+	public void update(){}
 }
