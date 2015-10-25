@@ -2,38 +2,64 @@ package org.usfirst.frc.team3476.Subsystems;
 
 import org.usfirst.frc.team3476.Main.Subsystem;
 
+import edu.wpi.first.wpilibj.SpeedController;
+
 public class Shooter implements Subsystem
 {
-	double test1, test2;
+	final String[] autoCommands = {"shooter", "aim"};
+	SpeedController fly1;
+	SpeedController fly2;
+	SpeedController fly3;
+	SpeedController fly4;
+	double flyPoint;
 	
+	public Shooter(SpeedController fly1in, SpeedController fly2in, SpeedController fly3in, SpeedController fly4in)
+	{
+		fly1 = fly1in;
+		fly2 = fly2in;
+		fly3 = fly3in;
+		fly4 = fly4in;
+		flyPoint = 0;
+	}
+	
+	@Override
 	public String[] getAutoCommands(){return new String[]{"test"};}
 	
+	@Override
 	public void doAuto(double[] params, String command)
 	{
-		if(command.equals("test"))
+		if(command.equalsIgnoreCase(("shooter")))
 		{
-			System.out.println("Test echo: colon param: " + params[0] + " @ param: " + params[1] + ". Constants: " + test1 + ", " + test2);
+			
 		}
 	}
 	
+	@Override
 	public boolean isAutoDone(){return true;}
 	
-	public String[] getConstantRequest(){return new String[]{"test1", "test2"};}//Request all needed constants
-	
-	public void returnConstantRequest(double[] constants)
+	@Override
+	public String[] getConstantRequest()//Request all needed constants
 	{
-		test1 = constants[0];
-		test2 = constants[1];
-	}//Request all needed constants
+		return new String[]{"test1", "test2"};
+	}
+	
+	@Override
+	public void returnConstantRequest(double[] constants)//Get all needed constants
+	{
+		
+	}
+	
+	
+
+	@Override
+	public void update()//flywheel control loop
+	{
+		// TODO Take back half control using flyPoint
+		
+	}
 	
 	public String toString()
 	{
 		return "Shooter";
-	}
-
-	@Override
-	public void update() {
-		// TODO Auto-generated method stub
-		
 	}
 }

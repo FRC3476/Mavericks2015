@@ -2,11 +2,21 @@ package org.usfirst.frc.team3476.Subsystems;
 
 import org.usfirst.frc.team3476.Main.Subsystem;
 
+import edu.wpi.first.wpilibj.SpeedController;
+
 public class Intake implements Subsystem
 {
 	private double SUCKMOTORSPEED, LOADMOTORSPEED;
 	final String[] autoCommands = {"intake"};
 	boolean done;
+	SpeedController dropdown;
+	SpeedController escalator;
+	
+	public Intake(SpeedController dropdownin, SpeedController escalatorin)
+	{
+		dropdown = dropdownin;
+		escalator = escalatorin;
+	}
 	
 	@Override
 	public String[] getAutoCommands()
@@ -17,15 +27,20 @@ public class Intake implements Subsystem
 	@Override
 	public synchronized void doAuto(double[] params, String command)
 	{
-		// TODO Auto-generated method stub
-
+		done = false;
+		if(command.equalsIgnoreCase("intake"))
+		{
+			//Direction(sign), percent speed, constant to invert if necessary and make timing correct
+			dropdown.set(params[0]*params[1]*SUCKMOTORSPEED);
+			escalator.set(params[0]*params[1]*LOADMOTORSPEED);
+			done = true;
+		}
 	}
 
 	@Override
 	public synchronized boolean isAutoDone()
 	{
-		// TODO Auto-generated method stub
-		return false;
+		return done;
 	}
 
 	@Override
@@ -42,10 +57,5 @@ public class Intake implements Subsystem
 	}
 
 	@Override
-	public synchronized void update()
-	{
-		// TODO Auto-generated method stub
-		
-	}
-
+	public synchronized void update(){}
 }
