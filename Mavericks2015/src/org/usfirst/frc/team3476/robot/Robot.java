@@ -73,7 +73,7 @@ public class Robot extends IterativeRobot {
     //Motor constants
 	double SUCKMOTORSPEED = -1.0;
 	double LOADMOTORSPEED = -1.0;
-	double GRABFRISBEETIME = 0.33;
+	double GRABFRISBEETIME = 0.50;
 	double SHOOTFRISBEETIME = 0.33;
     
     //Joystick buttons
