@@ -73,7 +73,7 @@ public class Robot extends IterativeRobot {
     //Motor constants
 	double SUCKMOTORSPEED = -1.0;
 	double LOADMOTORSPEED = -1.0;
-	double GRABFRISBEETIME = 0.50;
+	double GRABFRISBEETIME = 0.65;
 	double SHOOTFRISBEETIME = 0.33;
     
     //Joystick buttons
@@ -129,7 +129,8 @@ public class Robot extends IterativeRobot {
     	
     	//may have to reverse motors for shooter
     	//buttons and values may have to be changed
-    	drive.arcadeDrive(yAxis, xAxis);
+    	System.out.println(xAxis);
+    	drive.arcadeDrive(yAxis, xAxis + (.075));
     	//Poll joystick buttons
     	defaultButton = joystick.getRawButton(DEFAULT);
         intakeButton = joystick.getRawButton(INTAKE);
