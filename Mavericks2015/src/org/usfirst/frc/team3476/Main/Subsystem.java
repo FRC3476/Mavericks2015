@@ -10,7 +10,7 @@ public interface Subsystem
 	
 	String[] getConstantRequest();
 	
-	void returnConstantRequest(double[] constants);
+	void returnConstantRequest(double[] constantsin);
 	
 	void update();
 }

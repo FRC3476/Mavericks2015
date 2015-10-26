@@ -8,6 +8,7 @@ public class Intake implements Subsystem
 {
 	private double SUCKMOTORSPEED, LOADMOTORSPEED;
 	final String[] autoCommands = {"intake"};
+	final String[] constants = {"SUCKMOTORSPEED", "LOADMOTORSPEED"};
 	boolean done;
 	SpeedController dropdown;
 	SpeedController escalator;
@@ -16,6 +17,7 @@ public class Intake implements Subsystem
 	{
 		dropdown = dropdownin;
 		escalator = escalatorin;
+		done = true;
 	}
 	
 	@Override
@@ -46,14 +48,14 @@ public class Intake implements Subsystem
 	@Override
 	public String[] getConstantRequest()
 	{
-		return new String[]{"SUCKMOTORSPEED", "LOADMOTORSPEED"};
+		return constants;
 	}
 
 	@Override
-	public void returnConstantRequest(double[] constants)
+	public void returnConstantRequest(double[] constantsin)
 	{
-		SUCKMOTORSPEED = constants[0];
-		LOADMOTORSPEED = constants[1];
+		SUCKMOTORSPEED = constantsin[0];
+		LOADMOTORSPEED = constantsin[1];
 	}
 
 	@Override
