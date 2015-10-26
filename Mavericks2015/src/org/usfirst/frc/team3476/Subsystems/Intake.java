@@ -9,9 +9,9 @@ public class Intake implements Subsystem
 	private double SUCKMOTORSPEED, LOADMOTORSPEED;
 	final String[] autoCommands = {"intake"};
 	final String[] constants = {"SUCKMOTORSPEED", "LOADMOTORSPEED"};
-	boolean done;
-	SpeedController dropdown;
-	SpeedController escalator;
+	private boolean done;
+	private SpeedController dropdown;
+	private SpeedController escalator;
 	
 	public Intake(SpeedController dropdownin, SpeedController escalatorin)
 	{

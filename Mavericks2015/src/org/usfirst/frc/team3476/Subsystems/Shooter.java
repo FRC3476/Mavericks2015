@@ -10,12 +10,10 @@ public class Shooter implements Subsystem
 	private final String[] autoCommands = {"shooter", "aim", "flywheel"};
 	private final String[] constants = {"AIMUPPOWERED"};
 	private boolean AIMUPPOWERED, done;
-	private SpeedController fly1;
-	private SpeedController fly2;
-	private SpeedController fly3;
-	private SpeedController fly4;
+	private SpeedController fly1, fly2, fly3, fly4;
 	private Solenoid aim;
 	private double flyPoint;
+	private Thread flyThread;
 	
 	public Shooter(SpeedController fly1in, SpeedController fly2in, SpeedController fly3in, SpeedController fly4in, Solenoid aimin)
 	{
@@ -26,6 +24,8 @@ public class Shooter implements Subsystem
 		aim = aimin;
 		done = true;
 		flyPoint = 0;
+		flyThread = new Thread(new SubsystemTask(this));
+		flyThread.start();
 	}
 	
 	@Override
@@ -75,8 +75,15 @@ public class Shooter implements Subsystem
 	@Override
 	public void update()//flywheel control loop
 	{
-		// TODO Take back half control using flyPoint
+		//TODO: Take back half control using flyPoint
+		double output = 0;
 		
+		
+		
+		fly1.set(output);
+		fly2.set(output);
+		fly3.set(output);
+		fly4.set(output);
 	}
 	
 	public String toString()
