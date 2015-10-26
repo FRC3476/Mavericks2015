@@ -130,7 +130,15 @@ public class Robot extends IterativeRobot {
     	//may have to reverse motors for shooter
     	//buttons and values may have to be changed
     	System.out.println(xAxis);
-    	drive.arcadeDrive(yAxis, xAxis + (.075));
+    	
+    	double driveConstant = .075;
+    	if (yAxis > 0 ){
+    	drive.arcadeDrive(yAxis, xAxis + driveConstant);
+    	}
+    	if(yAxis < 0){
+    		drive.arcadeDrive(yAxis, xAxis - driveConstant);
+    	}
+    	
     	//Poll joystick buttons
     	defaultButton = joystick.getRawButton(DEFAULT);
         intakeButton = joystick.getRawButton(INTAKE);
