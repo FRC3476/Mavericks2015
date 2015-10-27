@@ -3,6 +3,8 @@ package org.usfirst.frc.team3476.Subsystems;
 import org.usfirst.frc.team3476.Main.Subsystem;
 import org.usfirst.frc.team3476.Utility.RunningAverage;
 import org.usfirst.frc.team3476.Utility.Control.BangBang;
+import org.usfirst.frc.team3476.Utility.Control.DifferentialGyro;
+import org.usfirst.frc.team3476.Utility.Control.PIDOutputWrapper;
 
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Gyro;
@@ -22,15 +24,15 @@ public class Drive implements Subsystem
 	private double DRIVESTRAIGHTDEAD, TURNDEAD, DRIVEP, DRIVEI, DRIVED, TURNP, TURNI, TURND;
 	
 	private Encoder left, right;
-	private Gyro gyro;
+	private DifferentialGyro gyro;
 	private RunningAverage encoderAvg;
 	private SpeedController drive1, drive2, drive3, drive4;
 	
-	private PIDController drive;
-	private PIDController turn;
+	private PIDController drive, turn;
+	private PIDOutputWrapper driveWrapper, turnWrapper;
 	private BangBang driven;
 	
-	public Drive(Encoder leftin, Encoder rightin, Gyro gyroin)
+	public Drive(Encoder leftin, Encoder rightin, DifferentialGyro gyroin)
 	{
 		done = false;
 		driveStraight = true;
@@ -41,12 +43,12 @@ public class Drive implements Subsystem
 		gyro = gyroin;
 		
 		encoderAvg = new RunningAverage(ENCODERSAMPLES);
+		driveWrapper = new PIDOutputWrapper();
+		turnWrapper = new PIDOutputWrapper();
 		
-		drive = new PIDController(DRIVEP, DRIVEI, DRIVED, encoderAvg, output)
-		turnSource = 
-		turnOutput =  
-		turn = 
-		driven = 
+		drive = new PIDController(DRIVEP, DRIVEI, DRIVED, encoderAvg, driveWrapper);
+		turn = new PIDController(TURNP, TURNI, TURND, gyro, driveWrapper);
+		driven = new BangBang(new double[]{1, -1});
 	}
 	
 	@Override
