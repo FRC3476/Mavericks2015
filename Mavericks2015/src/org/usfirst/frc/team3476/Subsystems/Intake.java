@@ -52,7 +52,7 @@ public class Intake implements Subsystem
 	}
 
 	@Override
-	public void returnConstantRequest(double[] constantsin)
+	public synchronized void returnConstantRequest(double[] constantsin)
 	{
 		SUCKMOTORSPEED = constantsin[0];
 		LOADMOTORSPEED = constantsin[1];
