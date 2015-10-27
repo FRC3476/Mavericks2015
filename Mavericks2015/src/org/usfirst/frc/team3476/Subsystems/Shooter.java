@@ -11,13 +11,13 @@ import edu.wpi.first.wpilibj.Timer;
 public class Shooter implements Subsystem
 {
 	private final String[] autoCommands = {"shooter", "aim", "flywheel"};
-	private final String[] constants = {"AIMUPPOWERED", "SHOOTEROUTPUTRANGEHIGH", "SHOOTEROUTPUTRANGELOW", "SHOOTERIGAIN", "FLY1DIR", "FLY2DIR", "FLY3DIR", "FLY4DIR", "GRABFRISBEETIME", "SHOOTFRISBEETIME"};
+	private final String[] constants = {"AIMUPPOWERED", "SHOOTEROUTPUTRANGEHIGH", "SHOOTEROUTPUTRANGELOW", "SHOOTERIGAIN", "FLY1DIR", "FLY2DIR", "FLY3DIR", "FLY4DIR", "GRABFRISBEETIME", "SHOOTFRISBEETIME", "FLYWHEELDEAD", "FLYWHEELMAXSPEED"};
 	private final double RPMTORPS = 60;
 	
 	enum Aim{UP, DOWN}
 	enum Load{IN, OUT}
 	
-	private double SHOOTEROUTPUTRANGEHIGH, SHOOTEROUTPUTRANGELOW, SHOOTERIGAIN, GRABFRISBEETIME, SHOOTFRISBEETIME;
+	private double SHOOTEROUTPUTRANGEHIGH, SHOOTEROUTPUTRANGELOW, SHOOTERIGAIN, GRABFRISBEETIME, SHOOTFRISBEETIME, FLYWHEELDEAD, FLYWHEELMAXSPEED;
 	private double[] FLYDIRS;
 	private boolean AIMUPPOWERED, done, firing, firingLast;
 	private SpeedController fly1, fly2, fly3, fly4;
@@ -89,16 +89,32 @@ public class Shooter implements Subsystem
 	@Override
 	public synchronized void returnConstantRequest(double[] constantsin)//Get all needed constants
 	{
-		AIMUPPOWERED = constantsin[0] == 1 ? true : false;
-		SHOOTEROUTPUTRANGEHIGH = constantsin[1];
-		SHOOTEROUTPUTRANGELOW = constantsin[2];
-		SHOOTERIGAIN = constantsin[3];
-		for(int i = 4; i < constantsin.length; i++)//get all the flydirs
-		{
-			FLYDIRS[i - 4] = constantsin[i];
-		}
+		int i = 0;
+		AIMUPPOWERED = constantsin[i] == 1 ? true : false;
+		i++;//1
+		SHOOTEROUTPUTRANGEHIGH = constantsin[i];
+		i++;//2
+		SHOOTEROUTPUTRANGELOW = constantsin[i];
+		i++;//3
+		SHOOTERIGAIN = constantsin[i];
+		i++;//4
+		FLYDIRS[i - 4] = constantsin[i];
+		i++;//5
+		FLYDIRS[i - 4] = constantsin[i];
+		i++;//6
+		FLYDIRS[i - 4] = constantsin[i];
+		i++;//7
+		FLYDIRS[i - 4] = constantsin[i];
+		i++;//8
+		GRABFRISBEETIME = constantsin[i];
+		i++;//9
+		SHOOTFRISBEETIME = constantsin[i];
+		i++;//10
+		FLYWHEELDEAD = constantsin[i];
+		i++;//11
+		FLYWHEELMAXSPEED = constantsin[i];
 		
-		control = new TakeBackHalf(new double[]{SHOOTEROUTPUTRANGEHIGH, SHOOTEROUTPUTRANGELOW}, SHOOTERIGAIN);
+		control = new TakeBackHalf(new double[]{SHOOTEROUTPUTRANGEHIGH, SHOOTEROUTPUTRANGELOW}, SHOOTERIGAIN, FLYWHEELMAXSPEED);
 		control.setSetpoint(0);
 		if (!flyThread.isAlive())
 		{
@@ -111,13 +127,13 @@ public class Shooter implements Subsystem
 	{
 		//Take back half control
 		double output = 0;
+		double process = tach.getRate()*RPMTORPS;//Get rps > to rpm
 		if(control == null)
 		{
 			throw new NullPointerException("No TakeBackHalf controller in Subsystem \"" + this +  "\" - constants not returned");
 		}
 		else
 		{
-			double process = tach.getRate()*RPMTORPS;//Get rps > to rpm
 			output = control.output(process);
 		}
 		
@@ -145,6 +161,13 @@ public class Shooter implements Subsystem
 		    	shootingTimer.reset();
 		    	firing = false;
 		    }
+		}
+		
+		//Check if we're done here 
+		//TODO: Decide if we need to wait for the flywheel needs to be in the deadzone for multiple iterations
+		if(Math.abs(control.getSetpoint() - process) < FLYWHEELDEAD && !firing)
+		{
+			done = true;
 		}
 	}
 	

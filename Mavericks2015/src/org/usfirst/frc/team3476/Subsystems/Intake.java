@@ -32,9 +32,9 @@ public class Intake implements Subsystem
 		done = false;
 		if(command.equalsIgnoreCase("intake"))
 		{
-			//Direction(sign), percent speed, constant to invert if necessary and make timing correct
-			dropdown.set(params[0]*params[1]*SUCKMOTORSPEED);
-			escalator.set(params[0]*params[1]*LOADMOTORSPEED);
+			//Direction(sign(possibly 0)), percent speed, constant to invert if necessary and make timing correct
+			dropdown.set(params[0]*params[1]*SUCKMOTORSPEED/100);
+			escalator.set(params[0]*params[1]*LOADMOTORSPEED/100);
 			done = true;
 		}
 	}
