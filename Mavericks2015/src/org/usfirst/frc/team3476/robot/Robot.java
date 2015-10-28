@@ -131,12 +131,20 @@ public class Robot extends IterativeRobot {
     	//buttons and values may have to be changed
     	System.out.println(xAxis);
     	
-    	double driveConstant = .075;
-    	if (yAxis > 0 ){
-    	drive.arcadeDrive(yAxis, xAxis + driveConstant);
+    	double driveConstant = .2;
+    	
+    	if (-.05<yAxis && yAxis<.05){
+    		drive.arcadeDrive(yAxis, xAxis);
     	}
-    	if(yAxis < 0){
+    	else if (yAxis > .05 ){
+    	drive.arcadeDrive(yAxis , xAxis+ driveConstant);
+    	System.out.println("yAxis is: " + yAxis);
+    	System.out.println("xAxis is: " + xAxis);
+    	}
+    	else if (yAxis < -.05){
     		drive.arcadeDrive(yAxis, xAxis - driveConstant);
+    		System.out.println("yAxis: "+ yAxis);
+    		System.out.println("xAxis is: " + xAxis);
     	}
     	
     	//Poll joystick buttons
