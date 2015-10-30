@@ -14,4 +14,11 @@ public class OrangeUtility
 		}
 		return toCoerce;
 	}
+	
+	public static double normalize(double toNormalize, double fromHigh, double fromLow, double toHigh, double toLow)
+	{
+		double factor = (toHigh - toLow) / (fromHigh - fromLow);
+		double add = toLow - fromLow*factor;
+		return toNormalize*factor + add;
+	}
 }

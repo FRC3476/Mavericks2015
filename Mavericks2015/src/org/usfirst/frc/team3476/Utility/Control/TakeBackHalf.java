@@ -1,5 +1,7 @@
 package org.usfirst.frc.team3476.Utility.Control;
 
+import org.usfirst.frc.team3476.Utility.OrangeUtility;
+
 import edu.wpi.first.wpilibj.Timer;
 
 public class TakeBackHalf extends ControlLoop
@@ -28,10 +30,11 @@ public class TakeBackHalf extends ControlLoop
 	@Override
 	protected double run(double process)
 	{
+		process = OrangeUtility.normalize(process, MAX, 0, 1, 0);
 		double setpoint = getSetpoint();
 		double curTime = timer.get();
 		
-		integral = integral + (curTime - lastTime)*(setpoint - process)*gain;
+		integral = OrangeUtility.coerce(integral + (curTime - lastTime)*(setpoint - process)*gain, Math.max(getOutputrange()[0], getOutputrange()[1]), Math.min(getOutputrange()[0], getOutputrange()[1]));
 		if((setpoint - lastProcess)*(setpoint - process) < 0)//Change of signs means overshoot
 		{
 			integral = (lastTBH + integral)/2;
@@ -46,7 +49,13 @@ public class TakeBackHalf extends ControlLoop
 	@Override
 	public void setSetpoint(double setpointin)
 	{
-		setSetpoint(setpointin);
-		lastTBH = 2*setpointin - MAX;
+		
+		setSetpoint(OrangeUtility.normalize(setpointin, MAX, 0, 1, 0));
+		lastTBH = 2*setpointin - 1;
+	}
+	
+	public double getMax()
+	{
+		return MAX;
 	}
 }
