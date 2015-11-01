@@ -2,11 +2,38 @@ package org.usfirst.frc.team3476.Subsystems;
 
 import org.usfirst.frc.team3476.Main.Subsystem;
 
+import edu.wpi.first.wpilibj.Relay;
+import edu.wpi.first.wpilibj.Relay.Value;
+import edu.wpi.first.wpilibj.SpeedController;
+import edu.wpi.first.wpilibj.Timer;
+
 public class Intake implements Subsystem
 {
-	private double SUCKMOTORSPEED, LOADMOTORSPEED;
-	final String[] autoCommands = {"intake"};
-	boolean done;
+	private double SUCKMOTORSPEED, LOADMOTORSPEED, ddTime;
+	final String[] autoCommands = {"intake", "dropdown"};
+	final String[] constants = {"SUCKMOTORSPEED", "LOADMOTORSPEED", "FORWARDISDOWN"};
+	private boolean done, FORWARDISDOWN, started;
+	private SpeedController dropdown, escalator;
+	private Relay ddmotor;
+	public enum DDdir{UP, DOWN, STOP}
+	DDdir curDir;
+	Timer ddTimer;
+	private Thread ddThread;
+	
+	public Intake(SpeedController dropdownin, SpeedController escalatorin, Relay ddmotorin)
+	{
+		dropdown = dropdownin;
+		escalator = escalatorin;
+		ddmotor = ddmotorin;
+		curDir = DDdir.STOP;
+		ddTimer = new Timer();
+		ddTime = 0;
+		started = true;
+		done = true;
+		
+		ddThread = new Thread(new SubsystemTask(this));
+		ddThread.start();
+	}
 	
 	@Override
 	public String[] getAutoCommands()
@@ -17,35 +44,93 @@ public class Intake implements Subsystem
 	@Override
 	public synchronized void doAuto(double[] params, String command)
 	{
-		// TODO Auto-generated method stub
-
+		done = false;
+		started = false;
+		if(command.equalsIgnoreCase("intake"))
+		{
+			//Direction(sign(possibly 0)), percent speed, constant to invert if necessary and make timing correct
+			dropdown.set(params[0]*params[1]*SUCKMOTORSPEED/100);
+			escalator.set(params[0]*params[1]*LOADMOTORSPEED/100);
+			done = true;
+		}
+		else if(command.equalsIgnoreCase("dropdown"))
+		{
+			switch((int)params[0])
+			{
+				case 1:
+					curDir = DDdir.DOWN;
+					break;
+				case 0:
+					curDir = DDdir.STOP;
+					setIntakeMovement(curDir);
+					done = true;
+					started = true;
+					break;
+				case -1:
+					curDir = DDdir.UP;
+					break;
+			}
+			ddTime = params[1];
+		}
 	}
 
 	@Override
 	public synchronized boolean isAutoDone()
 	{
-		// TODO Auto-generated method stub
-		return false;
+		return done;
 	}
 
 	@Override
 	public String[] getConstantRequest()
 	{
-		return new String[]{"SUCKMOTORSPEED", "LOADMOTORSPEED"};
+		return constants;
 	}
 
 	@Override
-	public void returnConstantRequest(double[] constants)
+	public synchronized void returnConstantRequest(double[] constantsin)
 	{
-		SUCKMOTORSPEED = constants[0];
-		LOADMOTORSPEED = constants[1];
+		SUCKMOTORSPEED = constantsin[0];
+		LOADMOTORSPEED = constantsin[1];
+		FORWARDISDOWN = constantsin[2] == 1;
 	}
 
 	@Override
 	public synchronized void update()
 	{
-		// TODO Auto-generated method stub
-		
+		if(!started && !done)
+		{
+			ddTimer.reset();
+			ddTimer.start();
+			setIntakeMovement(curDir);
+		}
+		else if(started && !done)
+		{
+			done = ddTimer.hasPeriodPassed(ddTime);
+			if(done) ddTimer.stop();
+		}
 	}
-
+	
+	public void setIntakeMovement(DDdir dir)
+	{
+		Value forward = Relay.Value.kForward;
+		Value reverse = Relay.Value.kReverse;
+		
+		switch(dir)
+		{
+			case UP:
+				ddmotor.set(FORWARDISDOWN ? reverse : forward);
+				break;
+			case DOWN:
+				ddmotor.set(FORWARDISDOWN ? forward : reverse);
+				break;
+			case STOP:
+				ddmotor.set(Relay.Value.kOff);
+				break;
+		}
+	}
+	
+	public String toString()
+	{
+		return "Intake";
+	}
 }

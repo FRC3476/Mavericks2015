@@ -2,7 +2,9 @@ package org.usfirst.frc.team3476.Utility;
 
 import java.util.ArrayList;
 
-public class RunningAverage
+import edu.wpi.first.wpilibj.PIDSource;
+
+public class RunningAverage implements PIDSource
 {
 	ArrayList<Double> values;
 	int numValues;
@@ -44,5 +46,11 @@ public class RunningAverage
 			sum += val;
 		}
 		runningAverage = sum/values.size();
+	}
+
+	@Override
+	public double pidGet()
+	{
+		return getAverage();
 	}
 }

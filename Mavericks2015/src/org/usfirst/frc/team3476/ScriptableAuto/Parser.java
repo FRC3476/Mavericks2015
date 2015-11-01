@@ -5,7 +5,9 @@ import java.util.ArrayList;
 
 public class Parser
 {
-	String PARALLELSEPARATOR = ";", CONSTANTSSEPERATOR = "\u001B", YEARSEPERATOR = "~", FIRSTPARAM = ":", SECONDPARAM = "@", THEN = ">";
+	final String BACKUPCONSTANTS = "DRIVEDEAD = 0.0\nDRIVESTRAIGHTDEAD= 0.0\nTURNDEAD = 0.0\nUSELEFT = 0.0\nUSERIGHT = 0.0\nSTRAIGHTP = 0.0\nSTRAIGHTI = 0.0\nSTRAIGHTD = 0.0\nSUCKMOTORSPEED = 0.0\nLOADMOTORSPEED = 0.0\nFORWARDISDOWN = 0.0\nAIMUPPOWERED = 0.0\nSHOOTEROUTPUTRANGEHIGH = 1\nSHOOTEROUTPUTRANGELOW = -1\nSHOOTERIGAIN = 0.00001\nFLY1DIR = 0.0\nFLY2DIR = 0.0\nFLY3DIR = 0.0\nFLY4DIR = 0.0\nGRABFRISBEETIME = 0.0\nSHOOTFRISBEETIME = 0.0\nFLYWHEELDEAD = 0.0\nFLYWHEELMAXSPEED = 0.0";
+	
+	final String PARALLELSEPARATOR = ";", CONSTANTSSEPERATOR = "\u001B", YEARSEPERATOR = "~", FIRSTPARAM = ":", SECONDPARAM = "@", THEN = ">";
 	String script;
 	String constants;
 	String constantYear;
@@ -156,7 +158,7 @@ public class Parser
 				return possYear.substring(possYear.indexOf(YEARSEPERATOR) + 1);
 			}
 		}
-		return "";
+		return BACKUPCONSTANTS;
 	}
 	
 	private double cleanDoubleParse(String mess)
