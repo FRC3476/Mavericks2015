@@ -33,6 +33,8 @@ public class Drive implements Subsystem
 	private PIDOutputWrapper driveWrapper, turnWrapper, straightWrapper;
 	private BangBang driven;
 	
+	private Thread driveThread;
+	
 	public Drive(Encoder leftin, Encoder rightin, DifferentialGyro gyroin, RobotDrive driveTrainin)
 	{
 		done = false;
@@ -53,6 +55,9 @@ public class Drive implements Subsystem
 		turn = new PIDController(TURNP, TURNI, TURND, gyro, turnWrapper);
 		straightTurn = new PIDController(STRAIGHTP, STRAIGHTI, STRAIGHTD, gyro, straightWrapper);
 		driven = new BangBang(new double[]{1, -1});
+		
+		driveThread = new Thread(new SubsystemTask(this));
+		driveThread.start();
 	}
 	
 	@Override
@@ -62,7 +67,7 @@ public class Drive implements Subsystem
 	}
 
 	@Override
-	public void doAuto(double[] params, String command)
+	public synchronized void doAuto(double[] params, String command)
 	{
 		switch(command)
 		{
@@ -79,7 +84,7 @@ public class Drive implements Subsystem
 	}
 
 	@Override
-	public boolean isAutoDone()
+	public synchronized boolean isAutoDone()
 	{
 		return done;
 	}
@@ -91,7 +96,7 @@ public class Drive implements Subsystem
 	}
 
 	@Override
-	public void returnConstantRequest(double[] constantsin)
+	public synchronized void returnConstantRequest(double[] constantsin)
 	{
 		int i = 0;
 		DRIVEDEAD = constantsin[i];
@@ -106,7 +111,7 @@ public class Drive implements Subsystem
 	}
 
 	@Override
-	public void update()
+	public synchronized void update()
 	{
 		//Poll the encoders - see what up
 		pollEncoders();
@@ -139,30 +144,30 @@ public class Drive implements Subsystem
 		}
 	}
 	
-	public void executeTurn(double delta)
+	public synchronized void executeTurn(double delta)
 	{
 		simple = false;
 		driveStraight = false;
 	}
 	
-	public void executeDrive(double delta)
+	public synchronized void executeDrive(double delta)
 	{
 		simple = false;
 		driveStraight = true;
 	}
 	
-	public void executeSimpleDrive(double delta, double speed)
+	public synchronized void executeSimpleDrive(double delta, double speed)
 	{
 		simple = true;
 		driveStraight = true;
 	}
 	
-	public double getAvgEncoder()
+	public synchronized double getAvgEncoder()
 	{
 		return encoderAvg.getAverage();
 	}
 	
-	public void pollEncoders()
+	public synchronized void pollEncoders()
 	{
 		if(USELEFT && USERIGHT)
 		{
@@ -176,5 +181,10 @@ public class Drive implements Subsystem
 		{
 			encoderAvg.addValue(right.getDistance());
 		}
+	}
+	
+	public String toString()
+	{
+		return "Drive";
 	}
 }

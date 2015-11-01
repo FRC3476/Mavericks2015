@@ -22,10 +22,11 @@ public class Shooter implements Subsystem
 	private boolean AIMUPPOWERED, done, firing, firingLast;
 	private SpeedController fly1, fly2, fly3, fly4;
 	private Solenoid aim, loader;
-	private Thread flyThread;
 	private TakeBackHalf control;
 	private Counter tach;
 	private Timer shootingTimer;
+	
+	private Thread flyThread;
 	
 	public Shooter(SpeedController fly1in, SpeedController fly2in, SpeedController fly3in, SpeedController fly4in, Solenoid aimin, Solenoid loaderin, Counter tachin)
 	{
@@ -39,7 +40,9 @@ public class Shooter implements Subsystem
 		loader = loaderin;
 		firing = false;
 		shootingTimer = new Timer();
+		
 		flyThread = new Thread(new SubsystemTask(this));
+		flyThread.start();
 	}
 	
 	@Override
