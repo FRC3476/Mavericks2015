@@ -7,12 +7,8 @@ import org.usfirst.frc.team3476.Utility.Control.DifferentialGyro;
 import org.usfirst.frc.team3476.Utility.Control.PIDOutputWrapper;
 
 import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.Gyro;
 import edu.wpi.first.wpilibj.PIDController;
-import edu.wpi.first.wpilibj.PIDOutput;
-import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.RobotDrive;
-import edu.wpi.first.wpilibj.SpeedController;
 
 //TODO: Synchronize relevant methods > thread safe
 public class Drive implements Subsystem
