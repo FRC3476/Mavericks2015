@@ -4,17 +4,38 @@ import org.usfirst.frc.team3476.Main.Subsystem;
 
 public class SubsystemTask implements Runnable
 {
-	Subsystem system;
+	private Subsystem system;
+	private boolean running, action;
 	
 	public SubsystemTask(Subsystem systemin)
 	{
 		system = systemin;
+		running = true;
+		action = false;
+	}
+	
+	public synchronized void terminate()
+	{
+		running = false;
+	}
+	
+	public synchronized void hold()
+	{
+		action = false;
+	}
+	
+	public synchronized void resume()
+	{
+		action = true;
 	}
 	
 	@Override
 	public void run()
 	{
-		system.update();
+		while(running)
+		{
+			if(action) system.update();
+		}
 	}
 
 }

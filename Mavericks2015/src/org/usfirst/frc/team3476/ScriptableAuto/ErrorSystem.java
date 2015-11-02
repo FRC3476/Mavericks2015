@@ -27,4 +27,13 @@ public class ErrorSystem implements Subsystem
 
 	@Override
 	public void update(){}
+
+	@Override
+	public void stopThreads(){}
+
+	@Override
+	public void startThreads(){}
+
+	@Override
+	public void terminateThreads(){}
 }

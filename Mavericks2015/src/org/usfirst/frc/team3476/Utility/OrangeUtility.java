@@ -21,4 +21,9 @@ public class OrangeUtility
 		double add = toLow - fromLow*factor;
 		return toNormalize*factor + add;
 	}
+	
+	public static boolean isStartLegal(Thread testing)
+	{
+		return testing.getState() == Thread.State.NEW;
+	}
 }

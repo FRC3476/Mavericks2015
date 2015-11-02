@@ -11,8 +11,15 @@ import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Timer;
 
+import org.usfirst.frc.team3476.Main.Subsystem;
+import org.usfirst.frc.team3476.ScriptableAuto.Main;
+import org.usfirst.frc.team3476.Subsystems.Drive;
+import org.usfirst.frc.team3476.Subsystems.Intake;
+import org.usfirst.frc.team3476.Subsystems.Shooter;
 import org.usfirst.frc.team3476.Utility.*;
+import org.usfirst.frc.team3476.Utility.Control.DifferentialGyro;
 
+import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.Encoder;
@@ -95,20 +102,86 @@ public class Robot extends IterativeRobot {
     //Encoders
     Encoder leftDrive = new Encoder(3, 4, true, EncodingType.k4X);
     Encoder rightDrive = new Encoder(1, 2, true, EncodingType.k4X);
+    
+    Main automain;
+    Subsystem[] systems;
+    AutoTask auto = new AutoTask();
+    Thread autoThread = new Thread(auto, "autoThread");
+    
+    DifferentialGyro gyro = new DifferentialGyro(0);//TODO: get this channel
+    
+    Counter tach = new Counter(0);//TODO: get this channel
+    
+    int iters = 0;
 
 	public void robotInit()
 	{
+		systems = new Subsystem[3];
+		systems[0] = new Drive(leftDrive, rightDrive, gyro, drive, shifterSoleniod);
+		systems[1] = new Shooter(flyTalon1, flyTalon2, flyTalon3, flyTalon4, aimSolenoid, loadSolenoid, tach);
+		systems[2] = new Intake(dropIntakeMotor, mainIntakeMotor, dropdown);
+		
+		automain = new Main("2013", systems);
+		
     	loadTimer.start();
     	
     	System.out.println("load timer: " + loadTimer.get());
     	leftDrive.setDistancePerPulse(0.01225688428613428232514076911301);
     	rightDrive.setDistancePerPulse(0.01225688428613428232514076911301);
     }
+	
+	@Override
+	public void disabledInit()
+	{
+		automain.stop(autoThread);//Stop auto thread, we're not in auto
+		automain.robotDriveClear();
+		//Stop auto threads, we're not in auto
+		for(Subsystem sys : systems)
+		{
+			sys.stopThreads();
+		}
+	}
+	
+	public void disabledPeriodic()
+	{
+		iters++;
+    	if(iters % 50 == 0) System.out.println("Threads: " + Thread.getAllStackTraces().keySet().size());
+    	if(iters % 20 == 0)
+    	{
+    		automain.update();
+    		automain.sendCheckText();
+    	}
+	}
+	
+	@Override
+	public void autonomousInit()
+	{
+		//This is first to appease watchdog
+		//Start all threads for auto
+		for(Subsystem sys : systems)
+		{
+			sys.startThreads();
+		}
+		automain.robotDriveClear();
+		automain.stop(autoThread);//Reset that sucker
+		autoThread = new Thread(auto, "autoThread");
+		autoThread.start();
+	}
 
     /**
      * This function is called periodically during autonomous
      */
-    public void autonomousPeriodic() {}
+    public void autonomousPeriodic(){}
+    
+    public void teleopInit()
+    {
+    	automain.stop(autoThread);//Stop auto thread, we're not in auto
+    	//Stop auto threads, we're not in auto
+    	for(Subsystem sys : systems)
+		{
+			sys.stopThreads();
+		}
+    }
 
     /**
      * This function is called periodically during operator control
@@ -141,7 +214,7 @@ public class Robot extends IterativeRobot {
     	System.out.println("yAxis is: " + yAxis);
     	System.out.println("xAxis is: " + xAxis);
     	}
-    	else if (yAxis < -.05){
+    	else{
     		drive.arcadeDrive(yAxis, xAxis - driveConstant);
     		System.out.println("yAxis: "+ yAxis);
     		System.out.println("xAxis is: " + xAxis);
@@ -344,4 +417,13 @@ public class Robot extends IterativeRobot {
      * This function is called periodically during test mode
      */
     public void testPeriodic() {}
+    
+    public class AutoTask implements Runnable
+    {
+		@Override
+		public void run()
+		{
+			automain.start();
+		}
+    }
 }

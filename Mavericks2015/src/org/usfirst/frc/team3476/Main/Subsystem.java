@@ -13,4 +13,10 @@ public interface Subsystem
 	void returnConstantRequest(double[] constantsin);
 	
 	void update();
+	
+	void stopThreads();
+	
+	void startThreads();
+	
+	void terminateThreads();
 }

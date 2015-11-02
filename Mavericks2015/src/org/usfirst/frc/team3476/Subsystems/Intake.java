@@ -1,6 +1,7 @@
 package org.usfirst.frc.team3476.Subsystems;
 
 import org.usfirst.frc.team3476.Main.Subsystem;
+import org.usfirst.frc.team3476.Utility.OrangeUtility;
 
 import edu.wpi.first.wpilibj.Relay;
 import edu.wpi.first.wpilibj.Relay.Value;
@@ -18,6 +19,8 @@ public class Intake implements Subsystem
 	public enum DDdir{UP, DOWN, STOP}
 	DDdir curDir;
 	Timer ddTimer;
+	
+	private SubsystemTask task;
 	private Thread ddThread;
 	
 	public Intake(SpeedController dropdownin, SpeedController escalatorin, Relay ddmotorin)
@@ -31,7 +34,8 @@ public class Intake implements Subsystem
 		started = true;
 		done = true;
 		
-		ddThread = new Thread(new SubsystemTask(this));
+		task = new SubsystemTask(this);
+		ddThread = new Thread(task, "ddThread");
 		ddThread.start();
 	}
 	
@@ -58,7 +62,7 @@ public class Intake implements Subsystem
 			switch((int)params[0])
 			{
 				case 1:
-					curDir = DDdir.DOWN;
+					curDir = DDdir.UP;
 					break;
 				case 0:
 					curDir = DDdir.STOP;
@@ -67,7 +71,7 @@ public class Intake implements Subsystem
 					started = true;
 					break;
 				case -1:
-					curDir = DDdir.UP;
+					curDir = DDdir.DOWN;
 					break;
 			}
 			ddTime = params[1];
@@ -92,6 +96,7 @@ public class Intake implements Subsystem
 		SUCKMOTORSPEED = constantsin[0];
 		LOADMOTORSPEED = constantsin[1];
 		FORWARDISDOWN = constantsin[2] == 1;
+		startThreads();
 	}
 
 	@Override
@@ -102,11 +107,16 @@ public class Intake implements Subsystem
 			ddTimer.reset();
 			ddTimer.start();
 			setIntakeMovement(curDir);
+			started = true;
 		}
 		else if(started && !done)
 		{
 			done = ddTimer.hasPeriodPassed(ddTime);
-			if(done) ddTimer.stop();
+			if(done)
+			{
+				ddTimer.stop();
+				setIntakeMovement(DDdir.STOP);
+			}
 		}
 	}
 	
@@ -132,5 +142,31 @@ public class Intake implements Subsystem
 	public String toString()
 	{
 		return "Intake";
+	}
+	
+	@Override
+	public void stopThreads()
+	{
+		task.hold();
+	}
+	
+	@Override
+	public void startThreads()
+	{
+		task.resume();
+	}
+	
+	public void terminateThreads()
+	{
+		task.terminate();
+		try
+		{
+			ddThread.join();
+			System.out.println("Ended " + this + " thread.");
+		}
+		catch(InterruptedException e)
+		{
+			System.out.println("Ended " + this + " thread.");
+		}
 	}
 }

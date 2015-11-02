@@ -1,6 +1,7 @@
 package org.usfirst.frc.team3476.Subsystems;
 
 import org.usfirst.frc.team3476.Main.Subsystem;
+import org.usfirst.frc.team3476.Utility.OrangeUtility;
 import org.usfirst.frc.team3476.Utility.Control.TakeBackHalf;
 
 import edu.wpi.first.wpilibj.Counter;
@@ -26,6 +27,7 @@ public class Shooter implements Subsystem
 	private Counter tach;
 	private Timer shootingTimer;
 	
+	private SubsystemTask task;
 	private Thread flyThread;
 	
 	public Shooter(SpeedController fly1in, SpeedController fly2in, SpeedController fly3in, SpeedController fly4in, Solenoid aimin, Solenoid loaderin, Counter tachin)
@@ -40,8 +42,10 @@ public class Shooter implements Subsystem
 		loader = loaderin;
 		firing = false;
 		shootingTimer = new Timer();
+		FLYDIRS = new double[4];
 		
-		flyThread = new Thread(new SubsystemTask(this));
+		task = new SubsystemTask(this);
+		flyThread = new Thread(task, "flyThread");
 		flyThread.start();
 	}
 	
@@ -119,10 +123,7 @@ public class Shooter implements Subsystem
 		
 		control = new TakeBackHalf(new double[]{SHOOTEROUTPUTRANGEHIGH, SHOOTEROUTPUTRANGELOW}, SHOOTERIGAIN, FLYWHEELMAXSPEED);
 		control.setSetpoint(0);
-		if (!flyThread.isAlive())
-		{
-			flyThread.start();
-		}
+		startThreads();
 	}
 
 	@Override
@@ -213,5 +214,31 @@ public class Shooter implements Subsystem
 	public String toString()
 	{
 		return "Shooter";
+	}
+	
+	@Override
+	public void stopThreads()
+	{
+		task.hold();
+	}
+	
+	@Override
+	public void startThreads()
+	{
+		task.resume();
+	}
+	
+	public void terminateThreads()
+	{
+		task.terminate();
+		try
+		{
+			flyThread.join();
+			System.out.println("Ended " + this + " thread.");
+		}
+		catch(InterruptedException e)
+		{
+			System.out.println("Ended " + this + " thread.");
+		}
 	}
 }

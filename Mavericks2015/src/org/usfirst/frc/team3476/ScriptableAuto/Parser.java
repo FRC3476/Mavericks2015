@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 public class Parser
 {
-	final String BACKUPCONSTANTS = "DRIVEDEAD = 0.0\nDRIVESTRAIGHTDEAD= 0.0\nTURNDEAD = 0.0\nUSELEFT = 0.0\nUSERIGHT = 0.0\nSTRAIGHTP = 0.0\nSTRAIGHTI = 0.0\nSTRAIGHTD = 0.0\nSUCKMOTORSPEED = 0.0\nLOADMOTORSPEED = 0.0\nFORWARDISDOWN = 0.0\nAIMUPPOWERED = 0.0\nSHOOTEROUTPUTRANGEHIGH = 1\nSHOOTEROUTPUTRANGELOW = -1\nSHOOTERIGAIN = 0.00001\nFLY1DIR = 0.0\nFLY2DIR = 0.0\nFLY3DIR = 0.0\nFLY4DIR = 0.0\nGRABFRISBEETIME = 0.0\nSHOOTFRISBEETIME = 0.0\nFLYWHEELDEAD = 0.0\nFLYWHEELMAXSPEED = 0.0";
+	final String BACKUPCONSTANTS = "//Driving deadzones\nDRIVEDEAD = 2\nDRIVESTRAIGHTDEAD = 5\nTURNDEAD = 5\n\n//encoders\nUSELEFT = 1\nUSERIGHT = 1\n\n//Drivestraight PID\nSTRAIGHTP = 1.5\nSTRAIGHTI = 0\nSTRAIGHTD = 0.001\n\n//Drive PID\nDRIVEP = 1.3\nDRIVEI = 0.005\nDRIVED = 0\n\n//Turn PID\nTURNP = 1.7\nTURNI = 0.005\nTURND = 0\n\n//Intake constants\nSUCKMOTORSPEED = -1\nLOADMOTORSPEED = -1\nFORWARDISDOWN = 0 //false\nAIMUPPOWERED = 1 //true\n\n//Shooter constants\nSHOOTEROUTPUTRANGEHIGH = 1\nSHOOTEROUTPUTRANGELOW = -1\nSHOOTERIGAIN = 0.00001\nFLY1DIR = -1\nFLY2DIR = 1\nFLY3DIR = -1\nFLY4DIR = 1\nGRABFRISBEETIME = 0.65\nSHOOTFRISBEETIME = 0.33\nFLYWHEELDEAD = 100\nFLYWHEELMAXSPEED = 3000";
 	
 	final String PARALLELSEPARATOR = ";", CONSTANTSSEPERATOR = "\u001B", YEARSEPERATOR = "~", FIRSTPARAM = ":", SECONDPARAM = "@", THEN = ">";
 	String script;
@@ -104,7 +104,7 @@ public class Parser
 			}
 			else
 			{
-				colonParam = cleanDoubleParse(command.substring(colonIndex + 1)); //Grab the stuff after the : - no @
+				colonParam = cleanDoubleParse(thenBlock.substring(colonIndex + 1)); //Grab the stuff after the : - no @
 			}
 		}
 		else
@@ -124,6 +124,10 @@ public class Parser
 		int keydex = constants.indexOf(key);
 		int equals = constants.indexOf("=", keydex);
 		
+		if(keydex == -1)
+		{
+			throw new IOException("Missing key \"" + key + "\" in constants file: \"" + constantYear + "\"\nConstants in use: \"" + constants + "\"");
+		}
 		if(equals == -1)
 		{
 			throw new IOException("Missing equals in " + constantYear + " constants at line " + (constants.substring(0, keydex).replace("[^\n]", "").length() + 1));
@@ -158,6 +162,7 @@ public class Parser
 				return possYear.substring(possYear.indexOf(YEARSEPERATOR) + 1);
 			}
 		}
+		System.out.println("USING BACKUP CONSTANTS!!!!!!!!!!!!!!");
 		return BACKUPCONSTANTS;
 	}
 	
@@ -169,5 +174,21 @@ public class Parser
 	public boolean hasNextLine()
 	{
 		return !script.equals("");
+	}
+	
+	public String getScript()
+	{
+		return script;
+	}
+	
+	public String getConstants()
+	{
+		return constants;
+	}
+	
+	public void update(String scriptin, String constantsin)
+	{
+		script = scriptin;
+		constants = constantsin;
 	}
 }

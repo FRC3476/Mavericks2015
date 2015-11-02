@@ -17,14 +17,14 @@ public class DifferentialGyro extends Gyro implements PIDSource
 		return getAngle() - lastHeading;
 	}
 	
-	public double getAngle()
-	{
-		return getAngle() - lastHeading;
-	}
-	
 	public void reset()
 	{
 		lastHeading = getAngle();
+	}
+	
+	public void resetSuper()
+	{
+		super.reset();
 	}
 	
 	@Override

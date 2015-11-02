@@ -49,8 +49,7 @@ public class TakeBackHalf extends ControlLoop
 	@Override
 	public void setSetpoint(double setpointin)
 	{
-		
-		setSetpoint(OrangeUtility.normalize(setpointin, MAX, 0, 1, 0));
+		super.setSetpoint(OrangeUtility.normalize(setpointin, MAX, 0, 1, 0));
 		lastTBH = 2*setpointin - 1;
 	}
 	

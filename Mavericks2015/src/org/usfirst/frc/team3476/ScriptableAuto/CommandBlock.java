@@ -24,18 +24,6 @@ public class CommandBlock
 		return commands.get(0);
 	}
 	
-	/*public void nextCommand()
-	{
-		if(curCommand + 1 >= commands.size())
-		{
-			curCommand = 0;
-		}
-		else
-		{
-			curCommand++;
-		}
-	}*/
-	
 	public void finishCommand()
 	{
 		commands.remove(0);//Remove last command given
