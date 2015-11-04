@@ -195,7 +195,6 @@ public class Drive implements Subsystem
 		}
 		else
 		{
-			System.out.println("Clearing drive");
 			driveTrain.arcadeDrive(0, 0);
 		}
 		

@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Timer;
 
 import org.usfirst.frc.team3476.Main.Subsystem;
+import org.usfirst.frc.team3476.ScriptableAuto.Clock;
 import org.usfirst.frc.team3476.ScriptableAuto.Main;
 import org.usfirst.frc.team3476.Subsystems.Drive;
 import org.usfirst.frc.team3476.Subsystems.Intake;
@@ -116,16 +117,17 @@ public class Robot extends IterativeRobot {
 
 	public void robotInit()
 	{
-		systems = new Subsystem[3];
+		systems = new Subsystem[10];
 		systems[0] = new Drive(leftDrive, rightDrive, gyro, drive, shifterSoleniod);
 		systems[1] = new Shooter(flyTalon1, flyTalon2, flyTalon3, flyTalon4, aimSolenoid, loadSolenoid, tach);
 		systems[2] = new Intake(dropIntakeMotor, mainIntakeMotor, dropdown);
+		systems[3] = new Clock();
 		
 		automain = new Main("2013", systems);
 		
     	loadTimer.start();
     	
-    	System.out.println("load timer: " + loadTimer.get());
+    	//System.out.println("load timer: " + loadTimer.get());
     	leftDrive.setDistancePerPulse(0.01225688428613428232514076911301);
     	rightDrive.setDistancePerPulse(0.01225688428613428232514076911301);
     }
@@ -138,7 +140,7 @@ public class Robot extends IterativeRobot {
 		//Stop auto threads, we're not in auto
 		for(Subsystem sys : systems)
 		{
-			sys.stopThreads();
+			if(sys != null) sys.stopThreads();
 		}
 	}
 	
@@ -160,7 +162,7 @@ public class Robot extends IterativeRobot {
 		//Start all threads for auto
 		for(Subsystem sys : systems)
 		{
-			sys.startThreads();
+			if(sys != null) sys.startThreads();
 		}
 		automain.robotDriveClear();
 		automain.stop(autoThread);//Reset that sucker
@@ -179,7 +181,7 @@ public class Robot extends IterativeRobot {
     	//Stop auto threads, we're not in auto
     	for(Subsystem sys : systems)
 		{
-			sys.stopThreads();
+			if(sys != null) sys.stopThreads();
 		}
     }
 
@@ -202,7 +204,7 @@ public class Robot extends IterativeRobot {
     	
     	//may have to reverse motors for shooter
     	//buttons and values may have to be changed
-    	System.out.println(xAxis);
+    	//System.out.println(xAxis);
     	
     	double driveConstant = .2;
     	
@@ -211,13 +213,13 @@ public class Robot extends IterativeRobot {
     	}
     	else if (yAxis > .05 ){
     	drive.arcadeDrive(yAxis , xAxis+ driveConstant);
-    	System.out.println("yAxis is: " + yAxis);
-    	System.out.println("xAxis is: " + xAxis);
+    	//System.out.println("yAxis is: " + yAxis);
+    	//System.out.println("xAxis is: " + xAxis);
     	}
     	else{
     		drive.arcadeDrive(yAxis, xAxis - driveConstant);
-    		System.out.println("yAxis: "+ yAxis);
-    		System.out.println("xAxis is: " + xAxis);
+    		//System.out.println("yAxis: "+ yAxis);
+    		//System.out.println("xAxis is: " + xAxis);
     	}
     	
     	//Poll joystick buttons
@@ -376,18 +378,18 @@ public class Robot extends IterativeRobot {
 	    	switch(shiftingState)
 	    	{
 	    		case HIGH:
-	    			System.out.print("Case: HIGH, Rate = " + Math.abs(avgRate.getAverage()));
+	    			//System.out.print("Case: HIGH, Rate = " + Math.abs(avgRate.getAverage()));
 	    			if(Math.abs(avgRate.getAverage()) <= IPS - HYSTERESIS) shiftingState = ShiftingState.LOW;
 	    			shifterSoleniod.set(false);
 	    			break;
 	    		case LOW:
-	    			System.out.print("Case: LOW, Rate = " + Math.abs(avgRate.getAverage()));
+	    			//System.out.print("Case: LOW, Rate = " + Math.abs(avgRate.getAverage()));
 	    			if(Math.abs(avgRate.getAverage()) >= IPS + HYSTERESIS) shiftingState = ShiftingState.HIGH;
 	    			shifterSoleniod.set(true);
 	    			break;
 	    	}
 	    }
-	    System.out.println(", Instant Rate = " + (rightDrive.getRate() + leftDrive.getRate())/2);
+	    //System.out.println(", Instant Rate = " + (rightDrive.getRate() + leftDrive.getRate())/2);
 	    
 	    //Grapple toggle
 	    //grapple is of type Toggle

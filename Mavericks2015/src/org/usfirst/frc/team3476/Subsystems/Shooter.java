@@ -131,7 +131,7 @@ public class Shooter implements Subsystem
 	{
 		//Take back half control
 		double output = 0;
-		double process = tach.getRate()*RPMTORPS;//Get rps > to rpm
+		/*double process = tach.getRate()*RPMTORPS;//Get rps > to rpm
 		if(control == null)
 		{
 			throw new NullPointerException("No TakeBackHalf controller in Subsystem \"" + this +  "\" - constants not returned");
@@ -139,7 +139,9 @@ public class Shooter implements Subsystem
 		else
 		{
 			output = control.output(process);
-		}
+		}*/
+		
+		output = control.getSetpoint() > 0 ? 1 : 0;
 		
 		fly1.set(output*FLYDIRS[0]);
 		fly2.set(output*FLYDIRS[1]);
@@ -169,7 +171,7 @@ public class Shooter implements Subsystem
 		
 		//Check if we're done here 
 		//TODO: Decide if we need to wait for the flywheel needs to be in the deadzone for multiple iterations
-		if(Math.abs(control.getSetpoint() - process) < FLYWHEELDEAD && !firing)
+		if(true /*Math.abs(control.getSetpoint() - process) < FLYWHEELDEAD*/ && !firing)
 		{
 			done = true;
 		}

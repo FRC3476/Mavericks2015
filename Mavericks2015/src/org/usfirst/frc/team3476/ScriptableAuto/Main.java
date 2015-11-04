@@ -89,22 +89,32 @@ public class Main
 		for(Subsystem current : systems)
 		{
 			//Return requested constants to the subsystem
-			String[] request = current.getConstantRequest();
-			double[] response = new double[request.length];
-			try
+			if(current != null)
 			{
-				for (int i = 0; i < request.length; i++)
+				String[] request = current.getConstantRequest();
+				if(request != null)
 				{
-					response[i] = par.getConstant(request[i]);
+					double[] response = new double[request.length];
+					try
+					{
+						for (int i = 0; i < request.length; i++)
+						{
+							response[i] = par.getConstant(request[i]);
+						}
+						current.returnConstantRequest(response);
+					}
+					catch (IOException e)
+					{
+						for (int i = 0; i < response.length; i++)
+							response[i] = 0.0;
+						current.returnConstantRequest(response);
+						System.out.println("IOEXCEPTION: " + e.getMessage());
+					}
 				}
-				current.returnConstantRequest(response);
-			}
-			catch (IOException e)
-			{
-				for (int i = 0; i < response.length; i++)
-					response[i] = 0.0;
-				current.returnConstantRequest(response);
-				System.out.println("IOEXCEPTION: " + e.getMessage());
+				else
+				{
+					System.out.println("Subsystem " + current + " gave a null constants request.");
+				}
 			}
 		}
 	}
@@ -113,9 +123,12 @@ public class Main
 	{
 		for(Subsystem toSearch : systems)
 		{
-			for(String searchString : toSearch.getAutoCommands())
+			if(toSearch != null)
 			{
-				if(searchString.equals(command.getName())) return toSearch;
+				for(String searchString : toSearch.getAutoCommands())
+				{
+					if(searchString.equals(command.getName())) return toSearch;
+				}
 			}
 		}
 		
