@@ -1,14 +1,12 @@
 	package org.usfirst.frc.team3476.Subsystems;
 
 import org.usfirst.frc.team3476.Main.Subsystem;
-import org.usfirst.frc.team3476.Utility.OrangeUtility;
 import org.usfirst.frc.team3476.Utility.RunningAverage;
 import org.usfirst.frc.team3476.Utility.Control.BangBang;
 import org.usfirst.frc.team3476.Utility.Control.DifferentialGyro;
 import org.usfirst.frc.team3476.Utility.Control.PIDOutputWrapper;
 
 import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.Gyro;
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Solenoid;
@@ -17,15 +15,15 @@ import edu.wpi.first.wpilibj.Solenoid;
 public class Drive implements Subsystem
 {
 	private final String[] autoCommands = {"turn", "drive", "driven", "shiftit", "clear"};
-	private final String[] constants = {"DRIVEDEAD", "DRIVESTRAIGHTDEAD", "TURNDEAD", "USELEFT", "USERIGHT", "STRAIGHTP", "STRAIGHTI", "STRAIGHTD", "DRIVEP", "DRIVEI", "DRIVED", "TURNP", "TURNI", "TURND"};
+	private final String[] constants = {"DRIVEDEAD", "DRIVESTRAIGHTDEAD", "TURNDEAD", "USELEFT", "USERIGHT", "STRAIGHTP", "STRAIGHTI", "STRAIGHTD", "DRIVEP", "DRIVEI", "DRIVED", "TURNP", "TURNI", "TURND", "SHIFTINGSPEED", "SHIFTINGHYS"};
 	final int ENCODERSAMPLES = 16;
 	
-	private boolean done, driveStraight, simple, USELEFT, USERIGHT, clear;
-	private double DRIVEDEAD, DRIVESTRAIGHTDEAD, TURNDEAD, DRIVEP, DRIVEI, DRIVED, TURNP, TURNI, TURND, STRAIGHTP, STRAIGHTI, STRAIGHTD;
+	private boolean done, driveStraight, simple, autoShifting, USELEFT, USERIGHT, clear;
+	private double DRIVEDEAD, DRIVESTRAIGHTDEAD, TURNDEAD, DRIVEP, DRIVEI, DRIVED, TURNP, TURNI, TURND, STRAIGHTP, STRAIGHTI, STRAIGHTD, SHIFTINGSPEED, SHIFTINGHYS;
 	
 	private Encoder left, right;
 	private DifferentialGyro gyro;
-	private RunningAverage encoderAvg;
+	private RunningAverage encoderAvg, avgRate;
 	private RobotDrive driveTrain;
 	private Solenoid shifters;
 	
@@ -37,6 +35,7 @@ public class Drive implements Subsystem
 	private Thread driveThread;
 	
 	public enum ShiftingState {LOW, HIGH}
+	ShiftingState shiftingState;
 	
 	public Drive(Encoder leftin, Encoder rightin, DifferentialGyro gyroin, RobotDrive driveTrainin, Solenoid shiftersin)
 	{
@@ -44,6 +43,8 @@ public class Drive implements Subsystem
 		driveStraight = true;
 		simple = false;
 		clear = true;
+		autoShifting = true;
+		shiftingState = ShiftingState.LOW;
 		
 		left = leftin;
 		right = rightin;
@@ -52,6 +53,7 @@ public class Drive implements Subsystem
 		shifters = shiftersin;
 		
 		encoderAvg = new RunningAverage(ENCODERSAMPLES);
+		avgRate = new RunningAverage(ENCODERSAMPLES);
 		driveWrapper = new PIDOutputWrapper();
 		turnWrapper = new PIDOutputWrapper();
 		straightWrapper = new PIDOutputWrapper();
@@ -75,6 +77,7 @@ public class Drive implements Subsystem
 	@Override
 	public synchronized void doAuto(double[] params, String command)
 	{
+		autoShifting = false;
 		done = false;
 		clear = false;
 		switch(command)
@@ -114,6 +117,7 @@ public class Drive implements Subsystem
 	@Override
 	public synchronized void returnConstantRequest(double[] constantsin)
 	{
+		
 		int i = 0;
 		DRIVEDEAD = constantsin[i];
 		i++;//1
@@ -124,6 +128,28 @@ public class Drive implements Subsystem
 		USELEFT = constantsin[i] == 1;
 		i++;//4
 		USERIGHT = constantsin[i] == 1;
+		i++;//5
+		STRAIGHTP = constantsin[i];
+		i++;//6
+		STRAIGHTI = constantsin[i];
+		i++;//7
+		STRAIGHTD = constantsin[i];
+		i++;//8
+		DRIVEP = constantsin[i];
+		i++;//9
+		DRIVEI = constantsin[i];
+		i++;//10
+		DRIVED = constantsin[i];
+		i++;//11
+		TURNP = constantsin[i];
+		i++;//12
+		TURNI = constantsin[i];
+		i++;//13
+		TURND = constantsin[i];
+		i++;//14
+		SHIFTINGSPEED = constantsin[i];
+		i++;//15
+		SHIFTINGHYS = constantsin[i];
 		
 		startThreads();
 	}
@@ -172,6 +198,29 @@ public class Drive implements Subsystem
 			System.out.println("Clearing drive");
 			driveTrain.arcadeDrive(0, 0);
 		}
+		
+		if(autoShifting)
+		{
+			switch(shiftingState)
+	    	{
+	    		case HIGH:
+	    			//System.out.print("Case: HIGH, Rate = " + Math.abs(avgRate.getAverage()));
+	    			if(Math.abs(avgRate.getAverage()) <= SHIFTINGSPEED - SHIFTINGHYS)
+	    			{
+	    				shiftingState = ShiftingState.LOW;
+	    				setShifterState(shiftingState);
+	    			}
+	    			break;
+	    		case LOW:
+	    			//System.out.print("Case: LOW, Rate = " + Math.abs(avgRate.getAverage()));
+	    			if(Math.abs(avgRate.getAverage()) >= SHIFTINGSPEED + SHIFTINGHYS)
+    				{
+	    				shiftingState = ShiftingState.HIGH;
+	    				setShifterState(shiftingState);
+    				}
+	    			break;
+	    	}
+		}
 	}
 	
 	public synchronized void executeTurn(double delta)
@@ -212,14 +261,17 @@ public class Drive implements Subsystem
 		if(USELEFT && USERIGHT)
 		{
 			encoderAvg.addValue((left.getDistance() + right.getDistance())/2);
+			avgRate.addValue((left.getRate() + right.getRate())/2);
 		}
 		else if(USELEFT)
 		{
 			encoderAvg.addValue(left.getDistance());
+			avgRate.addValue(left.getRate());
 		}
 		else if(USERIGHT)
 		{
 			encoderAvg.addValue(right.getDistance());
+			avgRate.addValue(right.getRate());
 		}
 	}
 	
@@ -245,6 +297,11 @@ public class Drive implements Subsystem
 		{
 			System.out.println("Ended " + this + " thread.");
 		}
+	}
+	
+	public void autoShifting(boolean auto)
+	{
+		autoShifting = auto;
 	}
 	
 	public synchronized void setShifterState(ShiftingState state)
