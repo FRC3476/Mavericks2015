@@ -6,7 +6,6 @@ import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Relay;
 import edu.wpi.first.wpilibj.Talon;
-import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Timer;
@@ -14,17 +13,12 @@ import edu.wpi.first.wpilibj.Timer;
 import org.usfirst.frc.team3476.Main.Subsystem;
 import org.usfirst.frc.team3476.ScriptableAuto.Clock;
 import org.usfirst.frc.team3476.ScriptableAuto.Main;
-import org.usfirst.frc.team3476.Subsystems.Drive;
-import org.usfirst.frc.team3476.Subsystems.Intake;
-import org.usfirst.frc.team3476.Subsystems.Shooter;
+import org.usfirst.frc.team3476.Subsystems.*;
 import org.usfirst.frc.team3476.Utility.*;
-import org.usfirst.frc.team3476.Utility.Control.DifferentialGyro;
+import org.usfirst.frc.team3476.Utility.Control.*;
 
 import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
-import edu.wpi.first.wpilibj.DigitalOutput;
-import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.Relay.Value;
 /**
  * The VM is configured to automatically run this class, and to call the
  * functions corresponding to each mode, as described in the IterativeRobot

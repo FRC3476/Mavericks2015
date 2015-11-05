@@ -1,8 +1,6 @@
 package org.usfirst.frc.team3476.Subsystems;
 
 import org.usfirst.frc.team3476.Main.Subsystem;
-import org.usfirst.frc.team3476.Utility.OrangeUtility;
-
 import edu.wpi.first.wpilibj.Relay;
 import edu.wpi.first.wpilibj.Relay.Value;
 import edu.wpi.first.wpilibj.SpeedController;
@@ -14,6 +12,7 @@ public class Intake implements Subsystem
 	final String[] autoCommands = {"intake", "dropdown"};
 	final String[] constants = {"SUCKMOTORSPEED", "LOADMOTORSPEED", "FORWARDISDOWN"};
 	private boolean done, FORWARDISDOWN, started;
+	
 	private SpeedController dropdown, escalator;
 	private Relay ddmotor;
 	public enum DDdir{UP, DOWN, STOP}

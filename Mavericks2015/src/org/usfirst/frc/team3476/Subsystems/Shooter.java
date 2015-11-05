@@ -1,7 +1,6 @@
 package org.usfirst.frc.team3476.Subsystems;
 
 import org.usfirst.frc.team3476.Main.Subsystem;
-import org.usfirst.frc.team3476.Utility.OrangeUtility;
 import org.usfirst.frc.team3476.Utility.Control.TakeBackHalf;
 
 import edu.wpi.first.wpilibj.Counter;
@@ -20,7 +19,7 @@ public class Shooter implements Subsystem
 	
 	private double SHOOTEROUTPUTRANGEHIGH, SHOOTEROUTPUTRANGELOW, SHOOTERIGAIN, GRABFRISBEETIME, SHOOTFRISBEETIME, FLYWHEELDEAD, FLYWHEELMAXSPEED;
 	private double[] FLYDIRS;
-	private boolean AIMUPPOWERED, done, firing, firingLast;
+	private boolean AIMUPPOWERED, flyDone, loadDone, firing, firingLast;
 	private SpeedController fly1, fly2, fly3, fly4;
 	private Solenoid aim, loader;
 	private TakeBackHalf control;
@@ -37,7 +36,8 @@ public class Shooter implements Subsystem
 		fly3 = fly3in;
 		fly4 = fly4in;
 		aim = aimin;
-		done = true;
+		flyDone = true;
+		loadDone = true;
 		tach = tachin;
 		loader = loaderin;
 		firing = false;
@@ -58,25 +58,33 @@ public class Shooter implements Subsystem
 	@Override
 	public synchronized void doAuto(double[] params, String command)
 	{
-		done = false;
-		boolean yes = params[0] == 1;
+		
+		
 		switch(command)
 		{
 			case "shooter":
+				flyDone = false;
+				
+				System.out.println("shooter command recognized");
 				control.setSetpoint(params[1]);
-				aim(yes ? Aim.UP : Aim.DOWN);
+				aim(params[0] == 1 ? Aim.UP : Aim.DOWN);
 				break;
 			case "aim":
-				aim(yes ? Aim.UP : Aim.DOWN);
+				aim(params[0] == 1 ? Aim.UP : Aim.DOWN);
 				break;
 			case "flywheel":
-				control.setSetpoint(params[1]);
+				flyDone = false;
+				
+				control.setSetpoint(params[0]);
 				break;
 			case "fire":
+				loadDone = false;
+				
+				System.out.println("fire command recognized");
 				startFire();
 				break;
 			case "loader":
-				loader.set(yes);
+				loader(params[0] == 1 ? Load.OUT : Load.IN);
 				break;
 		}
 	}
@@ -84,7 +92,7 @@ public class Shooter implements Subsystem
 	@Override
 	public synchronized boolean isAutoDone()
 	{
-		return done;
+		return flyDone && loadDone;
 	}
 	
 	@Override
@@ -151,18 +159,22 @@ public class Shooter implements Subsystem
 		//Shooter update
 		if(firing && !firingLast)//Starting firing sequence
 		{
+			System.out.println("Starting firing sequence");
 			shootingTimer.reset();
 			shootingTimer.start();
 			loader(Load.OUT);
 		}
 		else if(firing && !firingLast)//Update firing sequence
 		{
+			System.out.println("Updating firing sequence");
 			if(shootingTimer.get() > GRABFRISBEETIME)
 		    {
+				System.out.println("First time checkpoint passed");
 		    	loader(Load.IN);
 		    }
 		    if(shootingTimer.get() > GRABFRISBEETIME + SHOOTFRISBEETIME)
 		    {
+		    	System.out.println("Second time checkpoint passed, done");
 		    	shootingTimer.stop();
 		    	shootingTimer.reset();
 		    	firing = false;
@@ -171,10 +183,8 @@ public class Shooter implements Subsystem
 		
 		//Check if we're done here 
 		//TODO: Decide if we need to wait for the flywheel needs to be in the deadzone for multiple iterations
-		if(true /*Math.abs(control.getSetpoint() - process) < FLYWHEELDEAD*/ && !firing)
-		{
-			done = true;
-		}
+		if(true /*Math.abs(control.getSetpoint() - process) < FLYWHEELDEAD*/) flyDone = true;
+		if(!firing) loadDone = true;
 	}
 	
 	public synchronized void startFire()
@@ -189,12 +199,15 @@ public class Shooter implements Subsystem
 	
 	public synchronized void aim(Aim dir)
 	{
+		System.out.println("In aim, aiming " + dir);
 		switch(dir)
 		{
 			case UP:
+				System.out.println("AIM UP CASE");
 				aim.set(AIMUPPOWERED ? true : false);
 				break;
 			case DOWN:
+				System.out.println("AIM DOWN CASE");
 				aim.set(AIMUPPOWERED ? false : true);
 				break;
 		}
@@ -202,12 +215,15 @@ public class Shooter implements Subsystem
 	
 	public synchronized void loader(Load dir)
 	{
+		System.out.println("DOWN CASE");
 		switch(dir)
 		{
 			case IN:
+				System.out.println("LOADER IN CASE");
 				loader.set(false);
 				break;
 			case OUT:
+				System.out.println("LOADER OUT CASE");
 				loader.set(true);
 				break;
 		}
