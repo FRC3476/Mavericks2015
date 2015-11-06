@@ -129,6 +129,7 @@ public class Main
 				{
 					if(searchString.equals(command.getName())) return toSearch;
 				}
+				System.out.println("Command \"" + command.getName() + "\" not found.");
 			}
 		}
 		

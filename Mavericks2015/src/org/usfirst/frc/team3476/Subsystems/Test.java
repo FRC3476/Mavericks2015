@@ -42,4 +42,7 @@ public class Test implements Subsystem
 
 	@Override
 	public void terminateThreads(){}
+
+	@Override
+	public void end() {}
 }

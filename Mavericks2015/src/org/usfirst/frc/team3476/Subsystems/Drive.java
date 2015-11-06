@@ -321,4 +321,11 @@ public class Drive implements Subsystem
 	{
 		task.resume();
 	}
+
+	@Override
+	public void end()
+	{
+		clear = true;
+		setShifterState(ShiftingState.LOW);
+	}
 }

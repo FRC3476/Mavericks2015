@@ -75,8 +75,8 @@ public class Robot extends IterativeRobot {
     //Motor constants
 	double SUCKMOTORSPEED = -1.0;
 	double LOADMOTORSPEED = -1.0;
-	double GRABFRISBEETIME = 0.65;
-	double SHOOTFRISBEETIME = 0.33;
+	double GRABFRISBEETIME = 0.30;
+	double SHOOTFRISBEETIME = 0.15;
     
     //Joystick buttons
     final int DEFAULT = 12, INTAKE = 7, HIGH = 11, LOW = 9, TRIGGER = 1, MANUALFIRE = 2, GRAPPLE = 5, REVERSE = 3;//todo get button numbers for "-1"'s
@@ -95,7 +95,7 @@ public class Robot extends IterativeRobot {
     boolean intakeDownButton = xbox.getRawButton(INTAKEDOWN);
     
     //Encoders
-    Encoder leftDrive = new Encoder(3, 4, true, EncodingType.k4X);
+    Encoder leftDrive = new Encoder(3, 4, false, EncodingType.k4X);
     Encoder rightDrive = new Encoder(1, 2, true, EncodingType.k4X);
     
     Main automain;
@@ -115,7 +115,7 @@ public class Robot extends IterativeRobot {
 		systems[0] = new Drive(leftDrive, rightDrive, gyro, drive, shifterSoleniod);
 		systems[1] = new Shooter(flyTalon1, flyTalon2, flyTalon3, flyTalon4, aimSolenoid, loadSolenoid, tach);
 		systems[2] = new Intake(dropIntakeMotor, mainIntakeMotor, dropdown);
-		systems[3] = new Clock();
+		systems[3] = new Clock(systems);
 		
 		automain = new Main("2013", systems);
 		
@@ -185,7 +185,7 @@ public class Robot extends IterativeRobot {
     public void teleopPeriodic()
     {
     	avgRate.addValue((rightDrive.getRate() + leftDrive.getRate())/2);
-    	//System.out.println("Right: " + rightDrive.getDistance() + ", Left: " + leftDrive.getDistance() + ", Average Rate: " + (rightDrive.getRate() + leftDrive.getRate())/2);
+    	System.out.println("Right: " + rightDrive.getDistance() + ", Left: " + leftDrive.getDistance() + ", Average Rate: " + (rightDrive.getRate() + leftDrive.getRate())/2);
     	xAxis = -xbox.getRawAxis(4);
     	yAxis = -xbox.getRawAxis(1);
     	rightTrigger = xbox.getRawAxis(3);

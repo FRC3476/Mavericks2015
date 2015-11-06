@@ -7,15 +7,17 @@ public class Clock implements Subsystem
 {
 	private Thread clockThread;
 	private SubsystemTask task;
+	private Subsystem[] systems;
 	
 	private double time;
 	private boolean done;
 	
-	public Clock()
+	public Clock(Subsystem[] systemsin)
 	{
 		done = true;
 		time = 1;
 		
+		systems = systemsin;
 		task = new SubsystemTask(this);
 		clockThread = new Thread(task, "Clock");
 		clockThread.start();
@@ -24,21 +26,26 @@ public class Clock implements Subsystem
 	@Override
 	public String[] getAutoCommands()
 	{
-		return new String[]{"wait"};
+		return new String[]{"wait", "end"};
 	}
 
 	@Override
-	public void doAuto(double[] params, String command)
+	public synchronized void doAuto(double[] params, String command)
 	{
 		done = false;
 		if(command.equalsIgnoreCase("wait"))
 		{
 			wait(params[0]);
 		}
+		if(command.equalsIgnoreCase("end"))
+		{
+			end();
+			done = true;
+		}
 	}
 
 	@Override
-	public boolean isAutoDone()
+	public synchronized boolean isAutoDone()
 	{
 		return done;
 	}
@@ -50,7 +57,7 @@ public class Clock implements Subsystem
 	public void returnConstantRequest(double[] constantsin){}
 
 	@Override
-	public void update()
+	public synchronized void update()
 	{
 		if(!done)
 		{
@@ -90,7 +97,7 @@ public class Clock implements Subsystem
 		}
 	}
 	
-	public void wait(double timein)
+	public synchronized void wait(double timein)
 	{
 		time = timein;
 	}
@@ -99,5 +106,16 @@ public class Clock implements Subsystem
 	public String toString()
 	{
 		return "Clock";
+	}
+
+	@Override
+	public void end() {}
+	
+	public synchronized void megaEnd()
+	{
+		for(Subsystem sys : systems)
+		{
+			sys.end();
+		}
 	}
 }

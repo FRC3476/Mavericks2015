@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj.Timer;
 
 public class Shooter implements Subsystem
 {
-	private final String[] autoCommands = {"shooter", "aim", "flywheel"};
+	private final String[] autoCommands = {"shooter", "aim", "flywheel", "fire", "loader"};
 	private final String[] constants = {"AIMUPPOWERED", "SHOOTEROUTPUTRANGEHIGH", "SHOOTEROUTPUTRANGELOW", "SHOOTERIGAIN", "FLY1DIR", "FLY2DIR", "FLY3DIR", "FLY4DIR", "GRABFRISBEETIME", "SHOOTFRISBEETIME", "FLYWHEELDEAD", "FLYWHEELMAXSPEED"};
 	private final double RPMTORPS = 60;
 	
@@ -58,8 +58,7 @@ public class Shooter implements Subsystem
 	@Override
 	public synchronized void doAuto(double[] params, String command)
 	{
-		
-		
+		System.out.println("Shooter auto command: " + command);
 		switch(command)
 		{
 			case "shooter":
@@ -258,5 +257,12 @@ public class Shooter implements Subsystem
 		{
 			System.out.println("Ended " + this + " thread.");
 		}
+	}
+	
+	public void end()
+	{
+		aim(Aim.DOWN);
+		loader(Load.IN);
+		control.setSetpoint(0);
 	}
 }

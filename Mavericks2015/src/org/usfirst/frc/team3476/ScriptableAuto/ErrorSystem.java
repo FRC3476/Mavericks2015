@@ -36,4 +36,7 @@ public class ErrorSystem implements Subsystem
 
 	@Override
 	public void terminateThreads(){}
+
+	@Override
+	public void end() {}
 }

@@ -168,4 +168,12 @@ public class Intake implements Subsystem
 			System.out.println("Ended " + this + " thread.");
 		}
 	}
+
+	@Override
+	public void end()
+	{
+		setIntakeMovement(DDdir.STOP);
+		dropdown.set(0);
+		escalator.set(0);
+	}
 }
