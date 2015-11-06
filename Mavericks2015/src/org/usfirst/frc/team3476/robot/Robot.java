@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import org.usfirst.frc.team3476.Main.Subsystem;
 import org.usfirst.frc.team3476.ScriptableAuto.Clock;
@@ -152,22 +153,72 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void autonomousInit()
 	{
-		//This is first to appease watchdog
-		//Start all threads for auto
-		for(Subsystem sys : systems)
-		{
-			if(sys != null) sys.startThreads();
-		}
-		automain.robotDriveClear();
-		automain.stop(autoThread);//Reset that sucker
-		autoThread = new Thread(auto, "autoThread");
-		autoThread.start();
+//		//This is first to appease watchdog
+//		//Start all threads for auto
+//		for(Subsystem sys : systems)
+//		{
+//			if(sys != null) sys.startThreads();
+//		}
+//		automain.robotDriveClear();
+//		automain.stop(autoThread);//Reset that sucker
+//		autoThread = new Thread(auto, "autoThread");
+//		autoThread.start();
+		switch(SmartDashboard.getString("java auto text"))
+    	{
+			case "none":
+				break;
+			case "drop":
+				dropdown.set(Relay.Value.kReverse);
+				
+				Timer.delay(1.0);
+				
+				dropdown.set(Relay.Value.kOff);
+				break;
+			case "3disc":
+				flyTalon1.set(FLY1);
+				flyTalon2.set(FLY2);
+				flyTalon3.set(FLY3);
+				flyTalon4.set(FLY4);
+				aimSolenoid.set(true);
+				
+				dropdown.set(Relay.Value.kReverse);
+				
+				Timer.delay(1.0);
+				
+				dropdown.set(Relay.Value.kOff);
+				
+				for(int i = 0; i < 3; i++)
+				{
+					if(Timer.getMatchTime() > 15.0) break;
+					runningTimer = true;
+					
+			    	loadTimer.start();
+			    	runningTimer = true;
+					loadSolenoid.set(true);
+					
+					while(runningTimer)
+					{
+						if(Timer.getMatchTime() > 15.0) break;
+					    if(loadTimer.hasPeriodPassed(GRABFRISBEETIME))
+					    {
+					    	loadSolenoid.set(false);
+					    }
+					    if(loadTimer.hasPeriodPassed(GRABFRISBEETIME + SHOOTFRISBEETIME))
+					    {
+					    	loadTimer.stop();
+					    	loadTimer.reset();
+					    	runningTimer = false;
+					    }
+					}
+				}
+				break;
+    	}
 	}
 
     /**
      * This function is called periodically during autonomous
      */
-    public void autonomousPeriodic(){}
+    public void autonomousPeriodic() {}
     
     public void teleopInit()
     {

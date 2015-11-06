@@ -163,15 +163,15 @@ public class Shooter implements Subsystem
 			shootingTimer.start();
 			loader(Load.OUT);
 		}
-		else if(firing && !firingLast)//Update firing sequence
+		else if(firing && firingLast)//Update firing sequence
 		{
 			System.out.println("Updating firing sequence");
-			if(shootingTimer.get() > GRABFRISBEETIME)
+			if(shootingTimer.hasPeriodPassed(GRABFRISBEETIME))
 		    {
 				System.out.println("First time checkpoint passed");
 		    	loader(Load.IN);
 		    }
-		    if(shootingTimer.get() > GRABFRISBEETIME + SHOOTFRISBEETIME)
+		    if(shootingTimer.hasPeriodPassed(GRABFRISBEETIME + SHOOTFRISBEETIME))
 		    {
 		    	System.out.println("Second time checkpoint passed, done");
 		    	shootingTimer.stop();
