@@ -146,6 +146,7 @@ public class Robot extends IterativeRobot {
     	{
     		automain.update();
     		automain.sendCheckText();
+    		automain.passConstants();
     	}
 	}
 	
