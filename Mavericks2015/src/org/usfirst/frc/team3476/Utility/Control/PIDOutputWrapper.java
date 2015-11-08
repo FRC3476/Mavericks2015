@@ -5,10 +5,12 @@ import edu.wpi.first.wpilibj.PIDOutput;
 public class PIDOutputWrapper implements PIDOutput
 {
 	private double out;
+	private boolean invert;
 	
-	public PIDOutputWrapper()
+	public PIDOutputWrapper(boolean invertin)
 	{
 		out = 0;
+		invert = invertin;
 	}
 	
 	@Override
@@ -19,6 +21,6 @@ public class PIDOutputWrapper implements PIDOutput
 	
 	public double getOutput()
 	{
-		return out;
+		return invert ? -out : out;
 	}
 }

@@ -51,6 +51,7 @@ public class Intake implements Subsystem
 		started = false;
 		if(command.equalsIgnoreCase("intake"))
 		{
+			System.out.println("intaking " + params[0] + " at " + params[1] + "percent");
 			//Direction(sign(possibly 0)), percent speed, constant to invert if necessary and make timing correct
 			dropdown.set(params[0]*params[1]*SUCKMOTORSPEED/100);
 			escalator.set(params[0]*params[1]*LOADMOTORSPEED/100);

@@ -113,7 +113,7 @@ public class Main
 				}
 				else
 				{
-					System.out.println("Subsystem " + current + " gave a null constants request.");
+					//System.out.println("Subsystem " + current + " gave a null constants request.");
 				}
 			}
 		}
@@ -127,12 +127,15 @@ public class Main
 			{
 				for(String searchString : toSearch.getAutoCommands())
 				{
-					if(searchString.equals(command.getName())) return toSearch;
+					if(searchString.equals(command.getName()))
+					{
+						return toSearch;
+					}
 				}
-				System.out.println("Command \"" + command.getName() + "\" not found.");
 			}
 		}
-		
+		System.out.println("Command \"" + command.getName() + "\" not found.");
+
 		return new ErrorSystem();
 	}
 	

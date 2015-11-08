@@ -15,7 +15,7 @@ public class BangBang extends ControlLoop
 		{
 			return Math.max(getOutputrange()[0], getOutputrange()[1]);
 		}
-		else if(process > getSetpoint())
+		if(process > getSetpoint())
 		{
 			return Math.min(getOutputrange()[0], getOutputrange()[1]);
 		}

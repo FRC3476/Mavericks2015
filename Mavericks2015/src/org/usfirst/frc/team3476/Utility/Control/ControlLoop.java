@@ -33,5 +33,15 @@ public abstract class ControlLoop
 		return outputrange;
 	}
 	
+	public void setOutputrange(double[] outputrangein)
+	{
+		outputrange = outputrangein;
+	}
+	
 	protected abstract double run(double process);
+	
+	public double getError(double process)
+	{
+		return setpoint - process;
+	}
 }

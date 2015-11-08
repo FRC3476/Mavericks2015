@@ -39,7 +39,7 @@ public class Clock implements Subsystem
 		}
 		if(command.equalsIgnoreCase("end"))
 		{
-			end();
+			megaEnd();
 			done = true;
 		}
 	}
@@ -63,10 +63,10 @@ public class Clock implements Subsystem
 		{
 			try
 			{
-				clockThread.wait((int)(time*1000));
+				Thread.sleep((int)time);
 				done = true;
 			}
-			catch (InterruptedException e){}
+			catch (InterruptedException e){System.out.println("INTERRUPTEDEXCEPTION");}
 		}
 	}
 
@@ -115,7 +115,7 @@ public class Clock implements Subsystem
 	{
 		for(Subsystem sys : systems)
 		{
-			sys.end();
+			if(sys != null) sys.end();
 		}
 	}
 }

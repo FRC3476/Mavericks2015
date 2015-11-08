@@ -26,4 +26,13 @@ public class OrangeUtility
 	{
 		return testing.getState() == Thread.State.NEW;
 	}
+	
+	public static double donut(double toDonut, double threshold)
+	{
+		if(toDonut > 0)
+		{
+			return toDonut + threshold;
+		}
+		return toDonut - threshold;
+	}
 }

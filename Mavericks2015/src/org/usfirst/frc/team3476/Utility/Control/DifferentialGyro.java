@@ -1,25 +1,50 @@
 package org.usfirst.frc.team3476.Utility.Control;
 
+import java.util.Arrays;
+
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.Gyro;
 import edu.wpi.first.wpilibj.PIDSource;
 
 public class DifferentialGyro extends Gyro implements PIDSource
 {
-	public DifferentialGyro(int channel){super(channel);}
+	public final int DEFSAMPLES = 5;
+	private int samples;
 	
-	public DifferentialGyro(AnalogInput channel){super(channel);}
+	public DifferentialGyro(int channel)
+	{
+		super(channel);
+		samples = DEFSAMPLES;
+	}
+	
+	public DifferentialGyro(int channel, int numSamples)
+	{
+		super(channel);
+		samples = numSamples;
+	}
+	
+	public DifferentialGyro(AnalogInput channel)
+	{
+		super(channel);
+		samples = DEFSAMPLES;
+	}
+	
+	public DifferentialGyro(AnalogInput channel, int numSamples)
+	{
+		super(channel);
+		samples = numSamples;
+	}
 
 	private double lastHeading;
 	
 	public double calcDiff()
 	{
-		return getAngle() - lastHeading;
+		return get() - lastHeading;
 	}
 	
 	public void reset()
 	{
-		lastHeading = getAngle();
+		lastHeading = get();
 	}
 	
 	public void resetSuper()
@@ -32,5 +57,18 @@ public class DifferentialGyro extends Gyro implements PIDSource
 	{
 		return calcDiff();
 	}
-
+	
+	public double get()
+	{
+		double[] data = new double[samples];
+		
+		for(int i = 0; i < data.length; i++)
+		{
+			data[i] = getAngle();
+		}
+		
+		Arrays.sort(data);
+		
+		return data[(int)(samples/2)];
+	}
 }

@@ -2,7 +2,6 @@
 package org.usfirst.frc.team3476.robot;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
-import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Relay;
 import edu.wpi.first.wpilibj.Talon;
@@ -75,8 +74,8 @@ public class Robot extends IterativeRobot {
     //Motor constants
 	double SUCKMOTORSPEED = -1.0;
 	double LOADMOTORSPEED = -1.0;
-	double GRABFRISBEETIME = 0.30;
-	double SHOOTFRISBEETIME = 0.15;
+	double GRABFRISBEETIME = 0.35;
+	double SHOOTFRISBEETIME = 0.2;
     
     //Joystick buttons
     final int DEFAULT = 12, INTAKE = 7, HIGH = 11, LOW = 9, TRIGGER = 1, MANUALFIRE = 2, GRAPPLE = 5, REVERSE = 3;//todo get button numbers for "-1"'s
@@ -95,19 +94,20 @@ public class Robot extends IterativeRobot {
     boolean intakeDownButton = xbox.getRawButton(INTAKEDOWN);
     
     //Encoders
-    Encoder leftDrive = new Encoder(3, 4, false, EncodingType.k4X);
-    Encoder rightDrive = new Encoder(1, 2, true, EncodingType.k4X);
+    MedianEncoder leftDrive = new MedianEncoder(3, 4, false, EncodingType.k4X, 5);
+    MedianEncoder rightDrive = new MedianEncoder(1, 2, true, EncodingType.k4X, 5);
     
     Main automain;
     Subsystem[] systems;
     AutoTask auto = new AutoTask();
     Thread autoThread = new Thread(auto, "autoThread");
     
-    DifferentialGyro gyro = new DifferentialGyro(0);//TODO: get this channel
+    DifferentialGyro gyro = new DifferentialGyro(0, 5);//TODO: get this channel
     
     Counter tach = new Counter(0);//TODO: get this channel
     
     int iters = 0;
+    int threads = 0;
 
 	public void robotInit()
 	{
@@ -136,18 +136,20 @@ public class Robot extends IterativeRobot {
 		{
 			if(sys != null) sys.stopThreads();
 		}
+		threads = 0;
 	}
 	
 	public void disabledPeriodic()
 	{
 		iters++;
-    	if(iters % 50 == 0) System.out.println("Threads: " + Thread.getAllStackTraces().keySet().size());
+    	if(threads != Thread.getAllStackTraces().keySet().size()) System.out.println("Threads changed: " + Thread.getAllStackTraces().keySet().size());
     	if(iters % 20 == 0)
     	{
     		automain.update();
     		automain.sendCheckText();
     		automain.passConstants();
     	}
+    	threads = Thread.getAllStackTraces().keySet().size();
 	}
 	
 	@Override
@@ -186,9 +188,10 @@ public class Robot extends IterativeRobot {
     public void teleopPeriodic()
     {
     	avgRate.addValue((rightDrive.getRate() + leftDrive.getRate())/2);
-    	System.out.println("Right: " + rightDrive.getDistance() + ", Left: " + leftDrive.getDistance() + ", Average Rate: " + (rightDrive.getRate() + leftDrive.getRate())/2);
+    	//System.out.println("Right: " + rightDrive.getDistance() + ", Left: " + leftDrive.getDistance() + ", Average Rate: " + (rightDrive.getRate() + leftDrive.getRate())/2);
     	xAxis = -xbox.getRawAxis(4);
     	yAxis = -xbox.getRawAxis(1);
+    	System.out.println("yAxis: " + yAxis);
     	rightTrigger = xbox.getRawAxis(3);
     	
 //    	leftTalon1.set(xAxis+yAxis);

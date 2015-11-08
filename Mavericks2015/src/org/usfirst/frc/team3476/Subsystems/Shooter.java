@@ -19,7 +19,7 @@ public class Shooter implements Subsystem
 	
 	private double SHOOTEROUTPUTRANGEHIGH, SHOOTEROUTPUTRANGELOW, SHOOTERIGAIN, GRABFRISBEETIME, SHOOTFRISBEETIME, FLYWHEELDEAD, FLYWHEELMAXSPEED;
 	private double[] FLYDIRS;
-	private boolean AIMUPPOWERED, flyDone, loadDone, firing, firingLast;
+	private boolean AIMUPPOWERED, flyDone, loadDone, firing, firingLast, pass1;
 	private SpeedController fly1, fly2, fly3, fly4;
 	private Solenoid aim, loader;
 	private TakeBackHalf control;
@@ -58,13 +58,11 @@ public class Shooter implements Subsystem
 	@Override
 	public synchronized void doAuto(double[] params, String command)
 	{
-		System.out.println("Shooter auto command: " + command);
 		switch(command)
 		{
 			case "shooter":
 				flyDone = false;
 				
-				System.out.println("shooter command recognized");
 				control.setSetpoint(params[1]);
 				aim(params[0] == 1 ? Aim.UP : Aim.DOWN);
 				break;
@@ -79,7 +77,6 @@ public class Shooter implements Subsystem
 			case "fire":
 				loadDone = false;
 				
-				System.out.println("fire command recognized");
 				startFire();
 				break;
 			case "loader":
@@ -147,7 +144,6 @@ public class Shooter implements Subsystem
 		{
 			output = control.output(process);
 		}*/
-		
 		output = control.getSetpoint() > 0 ? 1 : 0;
 		
 		fly1.set(output*FLYDIRS[0]);
@@ -158,27 +154,27 @@ public class Shooter implements Subsystem
 		//Shooter update
 		if(firing && !firingLast)//Starting firing sequence
 		{
-			System.out.println("Starting firing sequence");
 			shootingTimer.reset();
 			shootingTimer.start();
 			loader(Load.OUT);
+			pass1 = false;
 		}
-		else if(firing && !firingLast)//Update firing sequence
+		else if(firing && firingLast)//Update firing sequence
 		{
-			System.out.println("Updating firing sequence");
-			if(shootingTimer.get() > GRABFRISBEETIME)
+			if(shootingTimer.get() > GRABFRISBEETIME && !pass1)
 		    {
-				System.out.println("First time checkpoint passed");
+				shootingTimer.reset();
 		    	loader(Load.IN);
+		    	pass1 = true;
 		    }
-		    if(shootingTimer.get() > GRABFRISBEETIME + SHOOTFRISBEETIME)
+			if(shootingTimer.get() > SHOOTFRISBEETIME && pass1)
 		    {
-		    	System.out.println("Second time checkpoint passed, done");
 		    	shootingTimer.stop();
 		    	shootingTimer.reset();
 		    	firing = false;
 		    }
 		}
+		firingLast = firing;
 		
 		//Check if we're done here 
 		//TODO: Decide if we need to wait for the flywheel needs to be in the deadzone for multiple iterations
@@ -198,15 +194,12 @@ public class Shooter implements Subsystem
 	
 	public synchronized void aim(Aim dir)
 	{
-		System.out.println("In aim, aiming " + dir);
 		switch(dir)
 		{
 			case UP:
-				System.out.println("AIM UP CASE");
 				aim.set(AIMUPPOWERED ? true : false);
 				break;
 			case DOWN:
-				System.out.println("AIM DOWN CASE");
 				aim.set(AIMUPPOWERED ? false : true);
 				break;
 		}
@@ -214,18 +207,20 @@ public class Shooter implements Subsystem
 	
 	public synchronized void loader(Load dir)
 	{
-		System.out.println("DOWN CASE");
 		switch(dir)
 		{
 			case IN:
-				System.out.println("LOADER IN CASE");
 				loader.set(false);
 				break;
 			case OUT:
-				System.out.println("LOADER OUT CASE");
 				loader.set(true);
 				break;
 		}
+	}
+	
+	public synchronized Load getLoader()
+	{
+		return loader.get() ? Load.OUT : Load.IN;
 	}
 	
 	public String toString()
@@ -261,6 +256,7 @@ public class Shooter implements Subsystem
 	
 	public void end()
 	{
+		flyDone = false;
 		aim(Aim.DOWN);
 		loader(Load.IN);
 		control.setSetpoint(0);

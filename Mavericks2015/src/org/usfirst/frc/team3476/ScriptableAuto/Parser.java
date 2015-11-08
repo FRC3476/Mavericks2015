@@ -2,6 +2,8 @@ package org.usfirst.frc.team3476.ScriptableAuto;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Parser
 {
@@ -121,23 +123,25 @@ public class Parser
 	
 	public double getConstant(String key) throws IOException
 	{
-		int keydex = constants.indexOf(key);
-		int equals = constants.indexOf("=", keydex);
+		Matcher match = Pattern.compile("^" + key + "\\s*=", Pattern.MULTILINE).matcher(constants);
+		
+		int keydex = match.find() ? match.end() : -1;
 		
 		if(keydex == -1)
 		{
-			throw new IOException("Missing key \"" + key + "\" in constants file: \"" + constantYear + "\"\nConstants in use: \"" + constants + "\"");
+			System.out.println("Match not found for key " + key);
+			//throw new IOException("Missing key \"" + key + "\" in constants file: \"" + constantYear + "\"\nConstants in use: \"" + constants + "\"");
 		}
-		if(equals == -1)
-		{
-			throw new IOException("Missing equals in " + constantYear + " constants at line " + (constants.substring(0, keydex).replace("[^\n]", "").length() + 1));
-		}
+//		if(equals == -1)
+//		{
+//			throw new IOException("Missing equals in " + constantYear + " constants at line " + (constants.substring(0, keydex).replace("[^\n]", "").length() + 1));
+//		}
 		int endOfLine = constants.indexOf("\n", keydex);
 		if(endOfLine == -1)
 		{
 			endOfLine = constants.length();
 		}
-		String sValue = constants.substring(equals + 1, endOfLine).trim();
+		String sValue = constants.substring(keydex, endOfLine).trim();
 		return cleanDoubleParse(sValue);
 	}
 	
