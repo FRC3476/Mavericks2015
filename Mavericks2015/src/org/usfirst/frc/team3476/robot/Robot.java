@@ -76,8 +76,8 @@ public class Robot extends IterativeRobot {
     //Motor constants
 	double SUCKMOTORSPEED = -1.0;
 	double LOADMOTORSPEED = -1.0;
-	double GRABFRISBEETIME = 0.30;
-	double SHOOTFRISBEETIME = 0.15;
+	double GRABFRISBEETIME = 0.35;
+	double SHOOTFRISBEETIME = 0.2;
     
     //Joystick buttons
     final int DEFAULT = 12, INTAKE = 7, HIGH = 11, LOW = 9, TRIGGER = 1, MANUALFIRE = 2, GRAPPLE = 5, REVERSE = 3;//todo get button numbers for "-1"'s
@@ -175,21 +175,26 @@ public class Robot extends IterativeRobot {
 				dropdown.set(Relay.Value.kOff);
 				break;
 			case "3disc":
+				drive.arcadeDrive(0, 0);
 				flyTalon1.set(FLY1);
 				flyTalon2.set(FLY2);
 				flyTalon3.set(FLY3);
 				flyTalon4.set(FLY4);
 				aimSolenoid.set(true);
 				
+				drive.arcadeDrive(0, 0);
 				dropdown.set(Relay.Value.kReverse);
 				
-				Timer.delay(1.0);
+				Timer.delay(0.75);
 				
+				drive.arcadeDrive(0, 0);
 				dropdown.set(Relay.Value.kOff);
 				
 				for(int i = 0; i < 3; i++)
 				{
+					boolean pass1 = false;
 					if(Timer.getMatchTime() > 15.0) break;
+					drive.arcadeDrive(0, 0);
 					runningTimer = true;
 					
 			    	loadTimer.start();
@@ -199,11 +204,14 @@ public class Robot extends IterativeRobot {
 					while(runningTimer)
 					{
 						if(Timer.getMatchTime() > 15.0) break;
-					    if(loadTimer.hasPeriodPassed(GRABFRISBEETIME))
+						drive.arcadeDrive(0, 0);
+					    if(!pass1 && loadTimer.get() > GRABFRISBEETIME)
 					    {
 					    	loadSolenoid.set(false);
+					    	loadTimer.reset();
+					    	pass1 = true;
 					    }
-					    if(loadTimer.hasPeriodPassed(GRABFRISBEETIME + SHOOTFRISBEETIME))
+					    if(pass1 && loadTimer.get() > SHOOTFRISBEETIME)
 					    {
 					    	loadTimer.stop();
 					    	loadTimer.reset();
@@ -218,7 +226,7 @@ public class Robot extends IterativeRobot {
     /**
      * This function is called periodically during autonomous
      */
-    public void autonomousPeriodic() {}
+    public void autonomousPeriodic() {drive.arcadeDrive(0, 0);}
     
     public void teleopInit()
     {
