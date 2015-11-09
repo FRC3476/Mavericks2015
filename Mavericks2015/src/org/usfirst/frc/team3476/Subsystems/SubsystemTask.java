@@ -35,6 +35,15 @@ public class SubsystemTask implements Runnable
 		while(running)
 		{
 			if(action) system.update();
+			else
+				try
+				{
+					Thread.sleep(50);
+				}
+				catch (InterruptedException e)
+				{
+					e.printStackTrace();
+				}
 		}
 	}
 

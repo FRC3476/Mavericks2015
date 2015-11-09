@@ -9,6 +9,10 @@ import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Timer;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
 import org.usfirst.frc.team3476.Main.Subsystem;
 import org.usfirst.frc.team3476.ScriptableAuto.Clock;
 import org.usfirst.frc.team3476.ScriptableAuto.Main;
@@ -25,11 +29,11 @@ import edu.wpi.first.wpilibj.CounterBase.EncodingType;
  * creating this project, you must also update the manifest file in the resource
  * directory.
  */
-public class Robot extends IterativeRobot {
-    /**
-     * This function is run when the robot is first started up and should be
-     * used for any initialization code.
-     */
+public class Robot extends IterativeRobot
+{
+	File logFile = new File("/usr/local/frc/logs/start.txt");
+	FileWriter logger;
+	
 	Joystick xbox = new Joystick(0);
 	Joystick joystick = new Joystick(1);
 	
@@ -109,15 +113,34 @@ public class Robot extends IterativeRobot {
     int iters = 0;
     int threads = 0;
 
+	/**
+   * This function is run when the robot is first started up and should be
+   * used for any initialization code.
+   */
 	public void robotInit()
 	{
+//		int tries = 5;
+//		for (int i = 0; i < tries; i++)
+//		{
+//			try
+//			{
+//				logger = new FileWriter(logFile);
+//			}
+//			catch (IOException e)
+//			{
+//				if(i == tries - 1) e.printStackTrace();
+//			} 
+//		}
+//		System.out.println("Made logger");
+//		clearLog();
+//		log("Started up");
+//	
+//		System.out.println("Logged");
 		systems = new Subsystem[10];
 		systems[0] = new Drive(leftDrive, rightDrive, gyro, drive, shifterSoleniod);
 		systems[1] = new Shooter(flyTalon1, flyTalon2, flyTalon3, flyTalon4, aimSolenoid, loadSolenoid, tach);
 		systems[2] = new Intake(dropIntakeMotor, mainIntakeMotor, dropdown);
 		systems[3] = new Clock(systems);
-		
-		automain = new Main("2013", systems);
 		
     	loadTimer.start();
     	
@@ -129,8 +152,12 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void disabledInit()
 	{
-		automain.stop(autoThread);//Stop auto thread, we're not in auto
-		automain.robotDriveClear();
+		if(automain != null)
+		{
+			automain.stop(autoThread);//Stop auto thread, we're not in auto
+			automain.robotDriveClear();
+		}
+		automain = null;
 		//Stop auto threads, we're not in auto
 		for(Subsystem sys : systems)
 		{
@@ -143,18 +170,13 @@ public class Robot extends IterativeRobot {
 	{
 		iters++;
     	if(threads != Thread.getAllStackTraces().keySet().size()) System.out.println("Threads changed: " + Thread.getAllStackTraces().keySet().size());
-    	if(iters % 20 == 0)
-    	{
-    		automain.update();
-    		automain.sendCheckText();
-    		automain.passConstants();
-    	}
     	threads = Thread.getAllStackTraces().keySet().size();
 	}
 	
 	@Override
 	public void autonomousInit()
 	{
+		if(automain == null) automain = new Main("2013", systems);
 		//This is first to appease watchdog
 		//Start all threads for auto
 		for(Subsystem sys : systems)
@@ -170,11 +192,19 @@ public class Robot extends IterativeRobot {
     /**
      * This function is called periodically during autonomous
      */
-    public void autonomousPeriodic(){}
+    public void autonomousPeriodic()
+    {
+    	if(Timer.getMatchTime() > 15.0) automain.stop(autoThread);
+    }
     
     public void teleopInit()
     {
-    	automain.stop(autoThread);//Stop auto thread, we're not in auto
+    	if(automain != null)
+		{
+			automain.stop(autoThread);//Stop auto thread, we're not in auto
+			automain.robotDriveClear();
+		}
+		automain = null;
     	//Stop auto threads, we're not in auto
     	for(Subsystem sys : systems)
 		{
@@ -191,21 +221,13 @@ public class Robot extends IterativeRobot {
     	//System.out.println("Right: " + rightDrive.getDistance() + ", Left: " + leftDrive.getDistance() + ", Average Rate: " + (rightDrive.getRate() + leftDrive.getRate())/2);
     	xAxis = -xbox.getRawAxis(4);
     	yAxis = -xbox.getRawAxis(1);
-    	System.out.println("yAxis: " + yAxis);
+    	//System.out.println("yAxis: " + yAxis);
     	rightTrigger = xbox.getRawAxis(3);
     	
-//    	leftTalon1.set(xAxis+yAxis);
-//    	rightTalon1.set(yAxis-xAxis);
-//    	leftTalon2.set(xAxis+yAxis);
-//    	rightTalon2.set(yAxis-xAxis);
-    
+    	//drive base code
+    	drive.arcadeDrive(yAxis, xAxis);
     	
-    	//may have to reverse motors for shooter
-    	//buttons and values may have to be changed
-    	//System.out.println(xAxis);
-    	
-    	double driveConstant = .2;
-    	
+    	/*double driveConstant = .2;
     	if (-.05<yAxis && yAxis<.05){
     		drive.arcadeDrive(yAxis, xAxis);
     	}
@@ -219,7 +241,7 @@ public class Robot extends IterativeRobot {
     		//System.out.println("yAxis: "+ yAxis);
     		//System.out.println("xAxis is: " + xAxis);
     	}
-    	
+    	*/
     	//Poll joystick buttons
     	defaultButton = joystick.getRawButton(DEFAULT);
         intakeButton = joystick.getRawButton(INTAKE);
@@ -418,6 +440,32 @@ public class Robot extends IterativeRobot {
      */
     public void testPeriodic() {}
     
+//	public void log(String info)
+//	{
+//		try
+//		{
+//			logger.write(System.currentTimeMillis() + ": Log: " + info + "\n");
+//			logger.flush();
+//		}
+//		catch (IOException e)
+//		{
+//			System.out.println("Failed to log \"" + info + "\"");
+//		}
+//	}
+//	
+//	public void clearLog()
+//	{
+//		logFile.delete();
+//		try
+//		{
+//			logFile.createNewFile();
+//		}
+//		catch (IOException e)
+//		{
+//			System.out.println("Failed to clear log.");
+//		}
+//	}
+	
     public class AutoTask implements Runnable
     {
 		@Override
