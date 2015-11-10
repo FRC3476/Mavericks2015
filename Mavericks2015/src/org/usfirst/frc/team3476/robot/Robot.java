@@ -112,13 +112,13 @@ public class Robot extends IterativeRobot {
 
 	public void robotInit()
 	{
-		systems = new Subsystem[10];
-		systems[0] = new Drive(leftDrive, rightDrive, gyro, drive, shifterSoleniod);
-		systems[1] = new Shooter(flyTalon1, flyTalon2, flyTalon3, flyTalon4, aimSolenoid, loadSolenoid, tach);
-		systems[2] = new Intake(dropIntakeMotor, mainIntakeMotor, dropdown);
-		systems[3] = new Clock(systems);
-		
-		automain = new Main("2013", systems);
+//		systems = new Subsystem[10];
+//		systems[0] = new Drive(leftDrive, rightDrive, gyro, drive, shifterSoleniod);
+//		systems[1] = new Shooter(flyTalon1, flyTalon2, flyTalon3, flyTalon4, aimSolenoid, loadSolenoid, tach);
+//		systems[2] = new Intake(dropIntakeMotor, mainIntakeMotor, dropdown);
+//		systems[3] = new Clock(systems);
+//		
+//		automain = new Main("2013", systems);
 		
     	loadTimer.start();
     	
@@ -130,24 +130,24 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void disabledInit()
 	{
-		automain.stop(autoThread);//Stop auto thread, we're not in auto
-		automain.robotDriveClear();
-		//Stop auto threads, we're not in auto
-		for(Subsystem sys : systems)
-		{
-			if(sys != null) sys.stopThreads();
-		}
+//		automain.stop(autoThread);//Stop auto thread, we're not in auto
+//		automain.robotDriveClear();
+//		//Stop auto threads, we're not in auto
+//		for(Subsystem sys : systems)
+//		{
+//			if(sys != null) sys.stopThreads();
+//		}
 	}
 	
 	public void disabledPeriodic()
 	{
-		iters++;
-    	if(iters % 50 == 0) System.out.println("Threads: " + Thread.getAllStackTraces().keySet().size());
-    	if(iters % 20 == 0)
-    	{
-    		automain.update();
-    		automain.sendCheckText();
-    	}
+//		iters++;
+//    	if(iters % 50 == 0) System.out.println("Threads: " + Thread.getAllStackTraces().keySet().size());
+//    	if(iters % 20 == 0)
+//    	{
+//    		automain.update();
+//    		automain.sendCheckText();
+//    	}
 	}
 	
 	@Override
