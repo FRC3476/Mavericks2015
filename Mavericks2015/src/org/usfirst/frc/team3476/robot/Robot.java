@@ -65,7 +65,7 @@ public class Robot extends IterativeRobot
 	//Grapple toggle
 	Toggle grapple = new Toggle();
 	
-	enum Mode {DEFAULT, INTAKE, SHOOTUP, SHOOTDOWN}
+	enum Mode {DEFAULT, INTAKE, SHOOTUP, SHOOTDOWN, DEMO}
     Mode mode = Mode.DEFAULT;
     
     //Shifting state
@@ -82,11 +82,12 @@ public class Robot extends IterativeRobot
 	double SHOOTFRISBEETIME = 0.2;
     
     //Joystick buttons
-    final int DEFAULT = 12, INTAKE = 7, HIGH = 11, LOW = 9, TRIGGER = 1, MANUALFIRE = 2, GRAPPLE = 5, REVERSE = 3;//todo get button numbers for "-1"'s
+    final int DEFAULT = 12, INTAKE = 7, HIGH = 11, LOW = 9, TRIGGER = 1, MANUALFIRE = 2, GRAPPLE = 5, REVERSE = 3, DEMO = 8;//todo get button numbers for "-1"'s
     boolean defaultButton = joystick.getRawButton(DEFAULT);
     boolean intakeButton = joystick.getRawButton(INTAKE);
     boolean highButton = joystick.getRawButton(HIGH);
     boolean lowButton = joystick.getRawButton(LOW);
+    boolean demoButton = joystick.getRawButton(DEMO);
     boolean trigger = joystick.getRawButton(TRIGGER);
     boolean manualFireButton = joystick.getRawButton(MANUALFIRE);
     boolean grappleButton = joystick.getRawButton(GRAPPLE);
@@ -247,6 +248,7 @@ public class Robot extends IterativeRobot
         intakeButton = joystick.getRawButton(INTAKE);
         highButton = joystick.getRawButton(HIGH);
         lowButton = joystick.getRawButton(LOW);
+        demoButton = joystick.getRawButton(DEMO);
         trigger = joystick.getRawButton(TRIGGER);
         manualFireButton = joystick.getRawButton(MANUALFIRE);
         grappleButton = joystick.getRawButton(GRAPPLE);
@@ -272,6 +274,11 @@ public class Robot extends IterativeRobot
     	else if(intakeButton)
     	{
     		mode = Mode.INTAKE;
+    	}
+    	
+    	else if(demoButton)
+    	{
+    		mode = Mode.DEMO;
     	}
     	
     	//mode switch block
@@ -306,6 +313,16 @@ public class Robot extends IterativeRobot
     	    	flyTalon2.set(FLY2);    	
     	    	flyTalon3.set(FLY3);    	
     	    	flyTalon4.set(FLY4);
+    	    	dropIntakeMotor.set(0);
+    	    	mainIntakeMotor.set(0);
+    	    	break;
+    	    	
+    		case DEMO:
+    			aimSolenoid.set(true);
+        		flyTalon1.set(FLY1*0.5);
+    	    	flyTalon2.set(FLY2*0.5);    	
+    	    	flyTalon3.set(FLY3*0.5);    	
+    	    	flyTalon4.set(FLY4*0.5);
     	    	dropIntakeMotor.set(0);
     	    	mainIntakeMotor.set(0);
     	    	break;
