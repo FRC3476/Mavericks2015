@@ -8,6 +8,11 @@ import org.usfirst.frc.team3476.Subsystems.StartSubsystem;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+/**
+ * The main autonomous class.
+ * @author Anthony Demetrescu
+ *
+ */
 public class Main
 {
 	Parser par;
@@ -28,7 +33,6 @@ public class Main
 		stop = false;
 	}
 	
-	/*
 	//Testing constructor
 	public Main(String year, Subsystem[] systemsin, String script, String constants)
 	{
@@ -36,7 +40,6 @@ public class Main
 		systems = systemsin;
 		passConstants();
 	}
-	*/
 	
 	/**
 	 * Starts autonomous.
@@ -58,7 +61,7 @@ public class Main
 			{
 				if(stop)break;
 				done = true;
-				for (CommandBlock block : curCommands)//Go thru each CommandBlock on this line
+				for(CommandBlock block : curCommands)//Go thru each CommandBlock on this line
 				{
 					if(stop)break;
 					if(block.hasNext())//If there is another command, do things
