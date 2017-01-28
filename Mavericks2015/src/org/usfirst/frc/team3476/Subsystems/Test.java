@@ -45,4 +45,6 @@ public class Test implements Subsystem
 
 	@Override
 	public void end() {}
+	
+	public boolean threadsActive(){return false;}
 }

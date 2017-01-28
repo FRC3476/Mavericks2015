@@ -261,4 +261,9 @@ public class Shooter implements Subsystem
 		loader(Load.IN);
 		control.setSetpoint(0);
 	}
+
+	public boolean threadsActive()
+	{
+		return task.isActive();
+	}
 }

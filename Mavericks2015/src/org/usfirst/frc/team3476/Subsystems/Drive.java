@@ -380,4 +380,9 @@ public class Drive implements Subsystem
 		}
 		return driven.output(process);
 	}
+	
+	public boolean threadsActive()
+	{
+		return task.isActive();
+	}
 }

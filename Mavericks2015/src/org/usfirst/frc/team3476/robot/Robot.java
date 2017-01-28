@@ -253,6 +253,8 @@ public class Robot extends IterativeRobot
         manualFireButton = joystick.getRawButton(MANUALFIRE);
         grappleButton = joystick.getRawButton(GRAPPLE);
         reverseButton = joystick.getRawButton(REVERSE);
+        
+        double speed = (-joystick.getRawAxis(3) + 1.0) / 2.0;
     	
     	//Poll xbox buttons
         intakeUpButton = xbox.getRawButton(INTAKEUP);
@@ -299,26 +301,26 @@ public class Robot extends IterativeRobot
     	    	
     		case SHOOTDOWN:
     			aimSolenoid.set(false);
-        		flyTalon1.set(FLY1);
-    	    	flyTalon2.set(FLY2);    	
-    	    	flyTalon3.set(FLY3);    	
-    	    	flyTalon4.set(FLY4);
+        		flyTalon1.set(FLY1 * speed);
+    	    	flyTalon2.set(FLY2 * speed);    	
+    	    	flyTalon3.set(FLY3 * speed);    	
+    	    	flyTalon4.set(FLY4 * speed);
     	    	dropIntakeMotor.set(0);
     	    	mainIntakeMotor.set(0);
     	    	break;
     	    	
     		case SHOOTUP:
     			aimSolenoid.set(true);
-        		flyTalon1.set(FLY1);
-    	    	flyTalon2.set(FLY2);    	
-    	    	flyTalon3.set(FLY3);    	
-    	    	flyTalon4.set(FLY4);
+        		flyTalon1.set(FLY1 * 0.6);
+    	    	flyTalon2.set(FLY2 * 0.6);    	
+    	    	flyTalon3.set(FLY3 * 0.6);    	
+    	    	flyTalon4.set(FLY4 * 0.6);
     	    	dropIntakeMotor.set(0);
     	    	mainIntakeMotor.set(0);
     	    	break;
     	    	
     		case DEMO:
-    			aimSolenoid.set(true);
+    			aimSolenoid.set(false);
         		flyTalon1.set(FLY1*0.5);
     	    	flyTalon2.set(FLY2*0.5);    	
     	    	flyTalon3.set(FLY3*0.5);    	
@@ -406,6 +408,7 @@ public class Robot extends IterativeRobot
 	    }
 	    
 	    //Manual shifting
+	    
 	    if(rightTrigger >= 0.5)//shift high
 	    {
 	    	shifterSoleniod.set(false);
